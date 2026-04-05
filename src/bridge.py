@@ -1,0 +1,126 @@
+import sys
+import json
+import struct
+import sqlite3
+import os
+import logging
+
+# primeiríssima linha após os imports do stdlib
+logging.basicConfig(
+    filename=r"C:\Projetos\WEB\python\REPOSITORIO\hashed_maze\debug.log",
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logging.debug("bridge.py iniciado")
+
+from src.config import db_path
+from src.database import SQLiteDB
+from src.crypt import CryptoVault
+
+# 1. Configuração do LOG (Salva em C:\Hashed_Maze\debug.log)
+# Como o script roda em background, o log é seus olhos e ouvidos.
+log_path = os.path.join(os.path.dirname(__file__), '..', 'debug.log')
+logging.basicConfig(
+    filename=log_path, 
+    level=logging.DEBUG, 
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+
+def get_password_from_db(url):
+    try:
+        db = SQLiteDB(db_path)
+        
+        logging.info(f"Consultando banco para a URL: {url}")
+        logging.debug(f"URL recebida para busca: repr={repr(url)}")
+
+        # searching password based on URL sent by Edge
+        sql = """
+            SELECT ciphertext, salt, nonce FROM credentials 
+            WHERE url LIKE ?
+            OR ? LIKE url || '%'
+            ORDER BY LENGTH(url) DESC
+            LIMIT 1
+        """
+        row = db.fetch_one(sql,(f'%{url}%', url))
+        
+        if not row:
+            return
+
+        data_ = {"ciphertext": row['ciphertext'],
+                 "salt": row['salt'],
+                 "nonce": row['nonce']
+        }
+
+        master_hash = CryptoVault.get_master_hash().hash
+
+        if not master_hash:
+            logging.error("Result of search: Master hash not found in database.")
+            return None
+        else:
+            logging.debug(f"Result of search: {row['ciphertext']}")
+        
+        # Returns decrypted password for browser autofill
+        return CryptoVault.decrypt(master_hash, data_)
+    except sqlite3.OperationalError as e:
+        logging.error(f"Database operation failed: {e}")
+        return None
+    except RuntimeError as e:
+        logging.error(f"Database connection error: {e}")
+        return None
+    except Exception as e:
+        logging.error(f"Unexpected error retrieving password: {e}")
+        return None
+    
+def listen():
+    logging.info("--- Ponte HashedMaze Iniciada ---")
+    
+    try:
+        while True:
+            # Lendo o tamanho da mensagem vinda do Edge (4 bytes iniciais)
+            raw_length = sys.stdin.buffer.read(4)
+            if not raw_length:
+                logging.info("Conexão fechada pelo navegador.")
+                break
+            
+            length = struct.unpack('I', raw_length)[0]
+            
+            # Lendo o conteúdo JSON da mensagem
+            # raw_data = sys.stdin.buffer.read(length).decode('utf-8')
+            raw_data = read_full_message(length).decode('utf-8')
+            message = json.loads(raw_data)
+            logging.debug(f"Mensagem recebida: {message}")
+
+            # Se a extensão pediu a senha (action: "get")
+            if message.get("action") == "get":
+                senha_recuperada = get_password_from_db(message['url'])
+                
+                # Montando a resposta JSON
+                response_dict = {"password": senha_recuperada}
+                response_json = json.dumps(response_dict).encode('utf-8')
+                
+                # Enviando de volta para o Edge (Tamanho + Conteúdo)
+                sys.stdout.buffer.write(struct.pack('I', len(response_json)))
+                sys.stdout.buffer.write(response_json)
+                sys.stdout.buffer.flush()
+                logging.debug(f"Resposta enviada com sucesso.")
+
+    except Exception as e:
+        logging.error(f"Erro crítico no loop de escuta: {str(e)}")
+
+def read_full_message(n):
+    data = b''
+    while len(data) < n:
+        chunk = sys.stdin.buffer.read(n - len(data))
+        if not chunk:
+            break
+        data += chunk
+    return data
+
+if __name__ == "__main__":
+    import msvcrt
+    import os
+    # Força o stdin/stdout a ignorar conversões de texto do Windows
+    msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+    msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+
+    listen()

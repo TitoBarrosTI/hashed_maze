@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "HashedMaze Connector",
+  "version": "1.0",
+  "permissions": ["nativeMessaging", "activeTab", "storage", "alarms"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ]
+}

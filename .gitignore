@@ -1,0 +1,28 @@
+# virtual environment
+.venv/
+
+# VSCode
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Database
+*.db
+*.db3
+
+# Build/dist
+build/
+dist/
+*.spec
+*.egg-info/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Others
+nomes_funcoes.txt
+debug.log

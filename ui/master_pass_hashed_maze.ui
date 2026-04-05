@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>876</width>
+    <height>692</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Register password - Hashed Maze</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QFrame" name="frame">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>565</height>
+      </size>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Shape::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Shadow::Raised</enum>
+     </property>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>130</y>
+        <width>151</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Master password:</string>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="edtMasterPass">
+      <property name="geometry">
+       <rect>
+        <x>50</x>
+        <y>150</y>
+        <width>342</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="echoMode">
+       <enum>QLineEdit::EchoMode::Password</enum>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btnAddMasterPass">
+      <property name="geometry">
+       <rect>
+        <x>294</x>
+        <y>180</y>
+        <width>97</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>save password</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblCaptionOpenTextFile_3">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>39</y>
+        <width>281</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Generate your vault master password.</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblIconUUID">
+      <property name="geometry">
+       <rect>
+        <x>765</x>
+        <y>20</y>
+        <width>80</width>
+        <height>81</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>ICON</string>
+      </property>
+     </widget>
+     <widget class="Line" name="line_4">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>60</y>
+        <width>571</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblMsg">
+      <property name="geometry">
+       <rect>
+        <x>56</x>
+        <y>182</y>
+        <width>232</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>...</string>
+      </property>
+     </widget>
+     <widget class="QProgressBar" name="pBar">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>150</y>
+        <width>118</width>
+        <height>23</height>
+       </rect>
+      </property>
+      <property name="maximum">
+       <number>0</number>
+      </property>
+      <property name="value">
+       <number>-1</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblInstructions">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>230</y>
+        <width>441</width>
+        <height>240</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&amp;lt;b&amp;gt;Create a strong password&amp;lt;/b&amp;gt;&amp;lt;br/&amp;gt;&amp;lt;br/&amp;gt;&lt;/p&gt;&lt;p&gt;Use at least 12 characters — longer passwords are more secure.&amp;lt;br/&amp;gt;&amp;lt;br/&amp;gt;&lt;/p&gt;&lt;p&gt;Avoid common patterns like 123456 or qwerty.&amp;lt;br/&amp;gt;&amp;lt;br/&amp;gt;&lt;/p&gt;&lt;p&gt;Don't use personal details like your name or birth date.&amp;lt;br/&amp;gt;&amp;lt;br/&amp;gt;&lt;/p&gt;&lt;p&gt;A good strategy is to combine random words or create a memorable phrase.&amp;lt;br/&amp;gt;&amp;lt;br/&amp;gt;&lt;/p&gt;&lt;p&gt;Try mixing uppercase letters, lowercase letters, numbers, and symbols.&amp;lt;br/&amp;gt;&amp;lt;br/&amp;gt;&lt;/p&gt;&lt;p&gt;Avoid reusing passwords across different accounts.&amp;lt;br/&amp;gt;&amp;lt;br/&amp;gt;&lt;/p&gt;&lt;p&gt;Keep your password private and change it if you think it's been exposed.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="textFormat">
+       <enum>Qt::TextFormat::RichText</enum>
+      </property>
+      <property name="wordWrap">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblCFGDatabaseDirectory">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>535</y>
+        <width>781</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QLabel{
+	color:rgb(20, 182, 71)
+}</string>
+      </property>
+      <property name="text">
+       <string>database directory:</string>
+      </property>
+     </widget>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnOk">
+       <property name="styleSheet">
+        <string notr="true">QPushButton {
+    padding: 0 32px;
+}</string>
+       </property>
+       <property name="text">
+        <string>OK</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
