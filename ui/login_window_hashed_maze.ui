@@ -31,8 +31,11 @@
         <height>21</height>
        </rect>
       </property>
+      <property name="layoutDirection">
+       <enum>Qt::LayoutDirection::LeftToRight</enum>
+      </property>
       <property name="text">
-       <string>teste</string>
+       <string/>
       </property>
       <property name="echoMode">
        <enum>QLineEdit::EchoMode::Password</enum>

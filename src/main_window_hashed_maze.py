@@ -149,7 +149,9 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 params = (f"%{filter}%",) if filter else ()
 
             sql = f"""
-            SELECT id, user, url, ciphertext, salt, nonce, notes, created_at
+            SELECT id, user, url, ciphertext, 
+                   salt, nonce, notes, created_at,
+                   COUNT(*) OVER() AS total
             FROM credentials
             {where}
             """
@@ -161,6 +163,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
             # hiding the column password
             self.treeCredentialsResponse.setColumnHidden(3, True)
+
+            self.lblResults.setText(f"results: {str(rows[0]["total"])}")
             
             for row in rows:
                 item = QTreeWidgetItem(self.treeCredentialsResponse)
