@@ -117,23 +117,22 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-**4. Run the application**
-```bash
-python main.py
+### Browser Extension
+
+**4. Register the Native Messaging host**
+```
+   Double-click `register_hash_maze.reg`
 ```
 
-### Browser Extension (optional)
-
-**5. Register the Native Messaging host**
-```bash
-python src/native_messaging/registry.py
-```
-
-**6. Load the extension in Chrome/Edge**
+**5. Load the extension in Chrome/Edge**
 - Open `chrome://extensions` or `edge://extensions`
 - Enable **Developer mode**
 - Click **Load unpacked** and select the `extension/` folder
 
+**6. Run the application**
+```bash
+python main.py
+```
 ---
 
 ## 🔐 Security Notes
@@ -155,7 +154,6 @@ python src/native_messaging/registry.py
 | Encryption | AES-256-GCM (`cryptography`) |
 | Password Analysis | `zxcvbn` |
 | Browser Integration | Native Messaging (Chrome/Edge) |
-| Code Formatting | `black` |
 
 ---
 
