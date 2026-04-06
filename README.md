@@ -102,7 +102,7 @@ hashed_maze/
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/TitoBarrosTI/hashed_maze.git
+git clone https://github.com/TitoBarrosTI/hashed_maze.git C:\hashed_maze
 cd hashed_maze
 ```
 
@@ -119,20 +119,30 @@ pip install -r requirements.txt
 
 ### Browser Extension
 
-**4. Register the Native Messaging host**
-```
-   Double-click `register_hash_maze.reg`
-```
-
-**5. Load the extension in Chrome/Edge**
+**4. Load the extension in Chrome/Edge**
 - Open `chrome://extensions` or `edge://extensions`
 - Enable **Developer mode**
 - Click **Load unpacked** and select the `extension/` folder
 
-**6. Run the application**
+**5. Run the application**
 ```bash
 python main.py
 ```
+---
+## ⚠️ Troubleshooting
+
+### Error: Specified native messaging host not found
+
+The extension relies on its Chrome-generated ID to communicate with the native host.
+
+This ID is derived from the extension's directory when loaded unpacked.
+If the directory is moved or differs from the one used during installation (e.g. `C:\hashed_maze`), the ID will change and communication will fail.
+
+**Solution:**
+- Keep the extension in the same directory defined during installation
+OR
+- Update the "allowed_origins" field in the native host manifest with the current extension ID (chrome://extensions)
+
 ---
 
 ## 🔐 Security Notes

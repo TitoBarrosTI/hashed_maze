@@ -5,9 +5,10 @@ import sqlite3
 import os
 import logging
 
-# primeiríssima linha após os imports do stdlib
-logging.basicConfig(
-    filename=r"C:\Projetos\WEB\python\REPOSITORIO\hashed_maze\debug.log",
+# very first line after the stdlib imports
+LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "debug.log")
+logging.basicConfig(    
+    filename=LOG_PATH,
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
@@ -17,8 +18,8 @@ from src.config import db_path
 from src.database import SQLiteDB
 from src.crypt import CryptoVault
 
-# 1. Configuração do LOG (Salva em C:\Hashed_Maze\debug.log)
-# Como o script roda em background, o log é seus olhos e ouvidos.
+# 1. LOG configuration (Sasaved in C:\Hashed_Maze\debug.log)
+# Since the script runs in the background, the log acts as its eyes and ears..
 log_path = os.path.join(os.path.dirname(__file__), '..', 'debug.log')
 logging.basicConfig(
     filename=log_path, 
@@ -76,7 +77,7 @@ def listen():
     
     try:
         while True:
-            # Lendo o tamanho da mensagem vinda do Edge (4 bytes iniciais)
+            # Reading the message size from Edge (first 4 bytes)
             raw_length = sys.stdin.buffer.read(4)
             if not raw_length:
                 logging.info("Conexão fechada pelo navegador.")
@@ -84,21 +85,21 @@ def listen():
             
             length = struct.unpack('I', raw_length)[0]
             
-            # Lendo o conteúdo JSON da mensagem
+            # Reading the JSON content of the message
             # raw_data = sys.stdin.buffer.read(length).decode('utf-8')
             raw_data = read_full_message(length).decode('utf-8')
             message = json.loads(raw_data)
             logging.debug(f"Mensagem recebida: {message}")
 
-            # Se a extensão pediu a senha (action: "get")
+            # If the extension asked for a password (action: "get")
             if message.get("action") == "get":
                 senha_recuperada = get_password_from_db(message['url'])
                 
-                # Montando a resposta JSON
+                # Assembling the JSON response
                 response_dict = {"password": senha_recuperada}
                 response_json = json.dumps(response_dict).encode('utf-8')
                 
-                # Enviando de volta para o Edge (Tamanho + Conteúdo)
+                # Sending back to Edge (Size + Content)
                 sys.stdout.buffer.write(struct.pack('I', len(response_json)))
                 sys.stdout.buffer.write(response_json)
                 sys.stdout.buffer.flush()
@@ -119,7 +120,7 @@ def read_full_message(n):
 if __name__ == "__main__":
     import msvcrt
     import os
-    # Força o stdin/stdout a ignorar conversões de texto do Windows
+    # Forces stdin/stdout to ignore Windows text conversions.
     msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
     msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 

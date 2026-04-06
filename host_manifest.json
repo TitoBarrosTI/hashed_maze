@@ -1,9 +1,9 @@
 {
   "name": "com.hashed_maze",
   "description": "Ponte para o meu cofre HashedMaze",
-  "path": "C:\\Projetos\\WEB\\python\\REPOSITORIO\\hashed_maze\\run_bridge_python_host.bat",
+  "path": "c:\\hashed_maze\\run_bridge_python_host.bat",
   "type": "stdio",
   "allowed_origins": [
-    "chrome-extension://gaoienohpdkolcghibinejpjmmdnkfcb/"
+    "chrome-extension://gmagciijklmgdpmlibnaiapngnllpila/"
   ]
 }

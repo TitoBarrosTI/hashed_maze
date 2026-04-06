@@ -1,3 +1,4 @@
 @echo off
-cd /d "C:\Projetos\WEB\python\REPOSITORIO\hashed_maze"
-"C:\Projetos\WEB\python\REPOSITORIO\hashed_maze\.venv\Scripts\python.exe" -m src.bridge
+REM  %~dp0 expands to atual (d)rive + (p)ath of this (0) .bat file
+cd /d "%~dp0"
+"%~dp0.venv\Scripts\python.exe" -m src.bridge
