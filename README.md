@@ -40,6 +40,10 @@ Built with Python and PySide6, it features a clean desktop interface, AES-256-GC
 
 ## 📸 Screenshots
 
+| Autofill in action — Brasil Paralelo streaming site |
+|---|
+| ![Obtaining Password](docs/screenshots/hashed_maze_obtaining_password.png) |
+
 | Master Password | Search & Delete |
 |---|---|
 | ![Master Password](docs/screenshots/hashed_maze_master_password_register.png) | ![Search and Delete](docs/screenshots/hashed_maze_search_delete_item.png) |

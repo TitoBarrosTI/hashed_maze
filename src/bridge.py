@@ -5,7 +5,7 @@ import sqlite3
 import os
 import logging
 
-# very first line after the stdlib imports
+# primeiríssima linha após os imports do stdlib
 LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "debug.log")
 logging.basicConfig(    
     filename=LOG_PATH,
@@ -120,7 +120,7 @@ def read_full_message(n):
 if __name__ == "__main__":
     import msvcrt
     import os
-    # Forces stdin/stdout to ignore Windows text conversions.
+    # Força o stdin/stdout a ignorar conversões de texto do Windows
     msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
     msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
