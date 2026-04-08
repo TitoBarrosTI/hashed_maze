@@ -1,11 +1,9 @@
-import os
 from contextlib import contextmanager
 import sqlite3
 from typing import Any, Generator
 
 class SQLiteDB:
     def __init__(self, db_path: str):
-        # dir_name = os.path.dirname(db_path)
         self.db_path = db_path
 
     @contextmanager
