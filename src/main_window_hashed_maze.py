@@ -2,9 +2,8 @@
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
-import os, sys, sqlite3
+import sqlite3
 from functools import partial
-# from typing import Any
 
 from PySide6.QtCore import Qt, QTimer, QSettings, QEvent, QUrl
 from PySide6.QtGui import QDesktopServices, QPixmap, QIcon, QWindowStateChangeEvent
@@ -31,6 +30,7 @@ from roundedframe import RoundedFrame
 from src.utils.resource_path import resource_path
 from src.utils.password_strength import calculate_force
 from src.utils.dialogs import confirm_dialog
+from src.core.state import AppState, UIState
 
 # Resolve resource path for dev and PyInstaller (_MEIPASS) environments
 Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/main_window_hashed_maze.ui"))  # type: ignore
@@ -39,17 +39,18 @@ class MainWindow(BaseClass, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.state = AppState(db_path)
         self.setFixedSize(self.size())
-        self.db = SQLiteDB(db_path)
-        self.db.initialize()
+        # self.state.db = SQLiteDB(db_path)
+        # self.state.db.initialize()
         self.pBar.setRange(0, 100)
         self.pBar.setTextVisible(False)
-        self.initial_row_items = {}
-        self.search_field = None  # flag
-        self.current_id: int | None = None
+        # self.initial_row_items = {}
+        # self.search_field = None  # flag
+        # self.current_id: int | None = None
         self.master_hash = None
-        self.salt = None
-        self._editing_id: int | None = None
+        # self.salt = None
+        # self._editing_id: int | None = None
         self.lblCFGDatabaseDirectory.setText(db_path)
 
         self.btnApply: QPushButton
@@ -93,12 +94,12 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.btnSearchBy.setMenu(menuSearch)
         self.btnSearchBy.setPopupMode(QToolButton.InstantPopup)
         self.btnSearch.clicked.connect(
-            lambda: self.search_credential(self.search_field, self.edtSearch.text())
+            lambda: self.search_credential(self.state.ui.search_field, self.edtSearch.text())
         )
         # endregion
 
         self.edtSearch.returnPressed.connect(
-            lambda: self.search_credential(self.search_field, self.edtSearch.text())
+            lambda: self.search_credential(self.state.ui.search_field, self.edtSearch.text())
         )
 
         # target fields for tree item data
@@ -155,7 +156,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
             FROM credentials
             {where}
             """
-            rows = self.db.fetch_all(sql, params)
+            rows = self.state.db.fetch_all(sql, params)
             self.treeCredentialsResponse.clear()
 
             if not rows:
@@ -236,15 +237,15 @@ class MainWindow(BaseClass, Ui_MainWindow):
             #.values() retrieves data in same order as the keys used above 
             # values = list(data.values()) + [self.current_id]
             values = list(data.values())
-            values.append(self.current_id)
+            values.append(self.state.ui.current_id)
 
-            self.db.execute(sql, tuple(values))
+            self.state.db.execute(sql, tuple(values))
 
             self.btnSearch.click()
         except Exception as e:
             print(f"Error on update: {e}")
 
-        self._editing_id = None  # flag edition
+        self.state.ui.editing_id = None  # flag edition
         self.btnApply.setEnabled(False)
         self.btnCancel.setEnabled(False)
         self.on_action_finished()
@@ -284,12 +285,12 @@ class MainWindow(BaseClass, Ui_MainWindow):
         }
 
         try:
-            self.db.insert(table, payload)
+            self.state.db.insert(table, payload)
         except Exception as e:
             print(f"Error on insert: {e}")
 
         self.clear_fields(self.fields_to_clean())
-        self._editing_id = None  # flag edition
+        self.state.ui.editing_id = None  # flag edition
         self.btnApply.setEnabled(False)
         self.btnCancel.setEnabled(False)
         self.on_action_finished()
@@ -298,14 +299,14 @@ class MainWindow(BaseClass, Ui_MainWindow):
     def load_data_row(self, mapping: dict, item, _) -> None:
         # visual feedback
         self.record_status(1)
-        self.current_id = item.data(0, Qt.ItemDataRole.UserRole)
-        self._editing_id = self.current_id  # flag edition
+        self.state.ui.current_id = item.data(0, Qt.ItemDataRole.UserRole)
+        self.state.ui.editing_id = self.state.ui.current_id # flag edition
         data_items = item.data(1, Qt.ItemDataRole.UserRole)
 
         # Saving initial data received from treecredentials for rollback if editing is cancelled
-        self.initial_row_items = {
+        self.state.ui.initial_row_items = {
             k: item.text(i)
-            for i, k in enumerate(["user","url","notes","password"])
+            for i, k in enumerate(["user","url","notes","ciphertext"])
         }
 
         for col_index, widget in mapping.items():
@@ -317,8 +318,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
                     nonce = data_items.get("nonce")
                     data_ = {"ciphertext": ciphertext, "salt": salt, "nonce": nonce}
                     master_hash = CryptoVault.get_master_hash().hash
-                    value_pass = CryptoVault.decrypt(master_hash, data_)
-                    widget.setText(str(value_pass))
+                    self.state.crypto.decrypted_pass = CryptoVault.decrypt(master_hash, data_)
+                    widget.setText(str(self.state.crypto.decrypted_pass))
                 continue
             
             value = item.text(col_index)            
@@ -337,13 +338,11 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.has_master_hash = CryptoVault.has_master_hash()
 
         if self.has_master_hash:
-            from src.models import MasterKey
-
             self.master_hash = CryptoVault.get_master_hash()
 
             from src.login_window_hashed_maze import LoginWindow
 
-            self.login_dialog = LoginWindow(self.master_hash, self.salt, parent=self)
+            self.login_dialog = LoginWindow(self.master_hash, self.state.crypto.salt, parent=self)
             self.hide()
 
             # .exec() trava aqui até o login chamar self.accept() ou self.reject()
@@ -413,7 +412,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
             self.frmStatusEdition.set_status_colors("#b7d9b1", "#a3c9a0", "#92b68f")
     # after select option in context menu search
     def set_value_search_variable(self, name) -> None:
-        self.search_field = name
+        self.state.ui.search_field = name
         self.edtSearch.clear()
         self.edtSearch.setPlaceholderText(f"search by {name}")
         self.edtSearch.setFocus()
@@ -483,7 +482,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
     # region ── Slot button ──────────────────────────────
     def on_click_new(self):
-        self._editing_id = None  # flag edition
+        self.state.ui.editing_id = None  # flag edition
         self.clear_fields(self.fields_to_clean())
         self.edtAccount.setFocus()
         # O lambda recebe o texto (*args) e o devolve na tupla de retorno
@@ -508,20 +507,23 @@ class MainWindow(BaseClass, Ui_MainWindow):
             elif key == 3:
                 keyName = "ciphertext"
 
-            value = self.initial_row_items.get(keyName, "")
+            value = self.state.ui.initial_row_items.get(keyName, "")
             
             if hasattr(widget, "setPlainText"):
                 widget.setPlainText(value)
             else:
+                # if it's ciphertext only
+                if key == 3: 
+                    value = self.state.crypto.decrypted_pass
                 widget.setText(value)
     def on_click_action(self, row_id: int, text: str, informative: str):
         if confirm_dialog(text, informative):
-            self.db.execute("DELETE FROM credentials WHERE id = ?", (row_id,))
-            self.search_credential(self.search_field, self.edtSearch.text())
+            self.state.db.execute("DELETE FROM credentials WHERE id = ?", (row_id,))
+            self.search_credential(self.state.ui.search_field, self.edtSearch.text())
             self.btnSearch.click()
             self.clear_fields(self.fields_to_clean())
     def handle_action_on_save_record(self):
-        if self._editing_id is None:
+        if self.state.ui.editing_id is None:
             ok, msg = self.insert_record("credentials")
         else:
             ok, msg = self.update_record("credentials", "id")
