@@ -125,7 +125,7 @@
      <widget class="QProgressBar" name="pBar">
       <property name="geometry">
        <rect>
-        <x>400</x>
+        <x>430</x>
         <y>150</y>
         <width>118</width>
         <height>23</height>
@@ -157,13 +157,51 @@
        <bool>false</bool>
       </property>
      </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>520</y>
+        <width>101</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true"/>
+      </property>
+      <property name="text">
+       <string>database directory:</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="btnShowPWD">
+      <property name="geometry">
+       <rect>
+        <x>397</x>
+        <y>149</y>
+        <width>23</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <property name="toolTip">
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;show/hide password&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="checkable">
+       <bool>false</bool>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+     </widget>
      <widget class="QLabel" name="lblCFGDatabaseDirectory">
       <property name="geometry">
        <rect>
         <x>40</x>
-        <y>535</y>
-        <width>781</width>
-        <height>20</height>
+        <y>536</y>
+        <width>801</width>
+        <height>16</height>
        </rect>
       </property>
       <property name="styleSheet">
