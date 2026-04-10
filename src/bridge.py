@@ -4,6 +4,7 @@ import struct
 import sqlite3
 import os
 import logging
+import socket
 
 # primeiríssima linha após os imports do stdlib
 LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "debug.log")
@@ -52,16 +53,12 @@ def get_password_from_db(url):
                  "nonce": row['nonce']
         }
 
-        master_hash = CryptoVault.get_master_hash().hash
-
-        if not master_hash:
-            logging.error("Result of search: Master hash not found in database.")
+        master_password = get_master_password()
+        if master_password is None:
+            logging.error("The bridge could not obtain the master password.")
             return None
-        else:
-            logging.debug(f"Result of search: {row['ciphertext']}")
         
-        # Returns decrypted password for browser autofill
-        return CryptoVault.decrypt(master_hash, data_)
+        return CryptoVault.decrypt(master_password, data_)
     except sqlite3.OperationalError as e:
         logging.error(f"Database operation failed: {e}")
         return None
@@ -116,6 +113,22 @@ def read_full_message(n):
             break
         data += chunk
     return data
+
+def get_master_password():
+    try:
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client.connect(("127.0.0.1", 5001))
+        client.sendall(b"GET_MASTER_PASSWORD")
+        response = client.recv(4096).decode()
+        client.close()
+
+        if response.startswith("ERROR"):
+            logging.error(response)
+            return None
+        return response
+    except Exception as e:
+        logging.error(f"Failed to obtain the master password: {e}")
+        return None
 
 if __name__ == "__main__":
     import msvcrt

@@ -3,8 +3,8 @@
 # Licensed under the MIT License
 
 from functools import partial
-import os, sys
 
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QPushButton, QWidget, QDialog, QApplication, QVBoxLayout,
                                QLineEdit, QLabel, QProgressBar)
 from PySide6.QtUiTools import loadUiType
@@ -41,8 +41,12 @@ class MasterPass(QDialog,Ui_MainWindow):
 
         # signal/slot connections
         self.btnAddMasterPass.clicked.connect(self.insert_master_pass)
-        # self.btnOk.clicked.connect(self.accept)
         self.btnOk.clicked.connect(self.on_click_btn_ok)
+        self.btnShowPWD.clicked.connect(self.show_pwd)
+
+        # icons works
+        self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
+
 
         self.strength = PasswordStrengthController(
             self.edtMasterPass,
@@ -52,7 +56,6 @@ class MasterPass(QDialog,Ui_MainWindow):
 
     def insert_master_pass(self):
         if not self.edtMasterPass.text():
-            # print(f'the master password field is empty, please correct it!')
             self.marquee = MarqueeController(
                 self.lblMsg,
                 "the master password field is empty, please correct it!",
@@ -96,6 +99,13 @@ class MasterPass(QDialog,Ui_MainWindow):
         else:
             self.reject()
 
+    def show_pwd(self):
+        if self.edtMasterPass.echoMode() == QLineEdit.EchoMode.Password:
+            self.edtMasterPass.setEchoMode(QLineEdit.EchoMode.Normal)
+            self.btnShowPWD.setIcon(QIcon("static/icons/visibility_off_20.png"))
+        else:
+            self.edtMasterPass.setEchoMode(QLineEdit.EchoMode.Password)
+            self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
 class MarqueeController:
     def __init__(self, widget, text, interval=100):
         self.widget = widget

@@ -1,7 +1,10 @@
+from src.database import SQLiteDB
+from src.config import db_path
 class CryptoState:
     def __init__(self):
-        self.master_hash: bytes | None = None 
-        self.salt: bytes | None = None
+        self.master_hash: str | None = None
+        self.salt_hash: bytes | None = None
+        self.derived_key: str | None = None
         self.decrypted_pass: str | None = None
 
 class UIState:
@@ -12,11 +15,15 @@ class UIState:
         self.initial_row_items: dict = {}
 
 class AppState:
-    from src.database import SQLiteDB
-    from src.config import db_path
+    # from src.database import SQLiteDB
+    # from src.config import db_path
 
     def __init__(self, db_path):
-        self.db = self.SQLiteDB(db_path)
+        # self.db = self.SQLiteDB(db_path)
+        self.db = SQLiteDB(db_path)
         self.db.initialize()
         self.crypto = CryptoState()
         self.ui = UIState()
+
+# from src.config import db_path
+app_state = AppState(db_path)

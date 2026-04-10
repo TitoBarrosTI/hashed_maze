@@ -28,7 +28,6 @@ class CryptoVault:
     def encrypt(master_password: str, plaintext: str) -> dict:
         salt = os.urandom(16)
         key = CryptoVault.derive_key(master_password, salt)
-
         aes = AESGCM(key)
         nonce = os.urandom(12)
 
@@ -49,18 +48,10 @@ class CryptoVault:
         salt = base64.b64decode(data["salt"])
         nonce = base64.b64decode(data["nonce"])
         ciphertext = base64.b64decode(data["ciphertext"])
-
         key = CryptoVault.derive_key(master_password, salt)
         aes = AESGCM(key)
+        return aes.decrypt(nonce, ciphertext, None).decode()   
 
-        plaintext = aes.decrypt(
-            nonce,
-            ciphertext,
-            None
-        )
-
-        return plaintext.decode()
-    
     @staticmethod
     def generate_hash_login(master_password:str) -> tuple:
         salt = os.urandom(16)
@@ -84,7 +75,7 @@ class CryptoVault:
             return MasterKey(hash=result['mkhash'], salt=result['salt'])
         return None
 
-    # # To check when attempting to access the app
+    # To check when attempting to access the app
     @staticmethod
     def hash_login_verify(typed_password, salt_db, hash_db):
         novo_hash = CryptoVault.derive_key(typed_password, salt_db)

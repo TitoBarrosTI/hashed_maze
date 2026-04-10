@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
+from doctest import master
 import sqlite3
 from functools import partial
 
@@ -41,19 +42,9 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.setupUi(self)
         self.state = AppState(db_path)
         self.setFixedSize(self.size())
-        # self.state.db = SQLiteDB(db_path)
-        # self.state.db.initialize()
         self.pBar.setRange(0, 100)
         self.pBar.setTextVisible(False)
-        # self.initial_row_items = {}
-        # self.search_field = None  # flag
-        # self.current_id: int | None = None
-        self.master_hash = None
-        # self.salt = None
-        # self._editing_id: int | None = None
         self.lblCFGDatabaseDirectory.setText(db_path)
-
-        self.btnApply: QPushButton
 
         # decides which screen will be opened
         self._setup_initial_screen()
@@ -214,12 +205,15 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
         except sqlite3.Error as e:
             print("general SQLite error:", e)
+    
     def update_record(self, table: str, where: str):
         if not self._required_fields_ok():
             return (False, "Fill in the required field")
 
-        master_hash = CryptoVault.get_master_hash().hash
-        vault = CryptoVault.encrypt(master_hash, self.edtPWD.text())
+        if self.state.crypto.derived_key is None:
+            return
+        
+        vault = CryptoVault.encrypt(self.state.crypto.derived_key , self.edtPWD.text())
 
         data = {
             "user": self.edtAccount.text(),
@@ -251,6 +245,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.on_action_finished()
 
         return True, "Updated successfully"
+    
     def insert_record(self, table: str):
         # obtaining inputs
         required_inputs = {
@@ -272,8 +267,10 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 return False, f"*** {key.title()} is mandatory! ***"
 
         # generating encrypted password
-        master_hash = CryptoVault.get_master_hash().hash
-        vault = CryptoVault.encrypt(master_hash, self.edtPWD.text())
+        if self.state.crypto.derived_key is None:
+            return 
+        
+        vault = CryptoVault.encrypt(self.state.crypto.derived_key, self.edtPWD.text())
 
         payload = {
             "user": self.edtAccount.text(),
@@ -296,6 +293,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.on_action_finished()
 
         return True, "Inserted successfully"
+    
     def load_data_row(self, mapping: dict, item, _) -> None:
         # visual feedback
         self.record_status(1)
@@ -317,8 +315,12 @@ class MainWindow(BaseClass, Ui_MainWindow):
                     salt = data_items.get("salt")
                     nonce = data_items.get("nonce")
                     data_ = {"ciphertext": ciphertext, "salt": salt, "nonce": nonce}
-                    master_hash = CryptoVault.get_master_hash().hash
-                    self.state.crypto.decrypted_pass = CryptoVault.decrypt(master_hash, data_)
+                    
+                    if self.state.crypto.derived_key is None:
+                        return
+
+                    self.state.crypto.decrypted_pass = CryptoVault.decrypt(self.state.crypto.derived_key, data_)
+
                     widget.setText(str(self.state.crypto.decrypted_pass))
                 continue
             
@@ -335,31 +337,19 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
     # region ── Setup ─────────────────────────────────────
     def _setup_initial_screen(self):
-        self.has_master_hash = CryptoVault.has_master_hash()
-
-        if self.has_master_hash:
-            self.master_hash = CryptoVault.get_master_hash()
-
+        if CryptoVault.has_master_hash():
             from src.login_window_hashed_maze import LoginWindow
-
-            self.login_dialog = LoginWindow(self.master_hash, self.state.crypto.salt, parent=self)
-            self.hide()
-
-            # .exec() trava aqui até o login chamar self.accept() ou self.reject()
-            if self.login_dialog.exec():
-                self.show()
-            else:
-                self.close()
+            self.login_or_hash = LoginWindow(self.state, parent=self)
         else:
             from src.master_pass_hashed_maze import MasterPass
+            self.login_or_hash = MasterPass(parent=self)
+        
+        self.hide()
 
-            self.master_pass_dialog = MasterPass(parent=self)
-            self.hide()
-
-            if self.master_pass_dialog.exec():
-                self.show()
-            else:
-                self.close()
+        if self.login_or_hash.exec():
+            self.show()
+        else:
+            self.close()
     # endregion
 
     # region ── UI helpers ────────────────────────────────
@@ -370,6 +360,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
             self.lblIconConfig.setPixmap(QPixmap("static/icons/settings_50.png"))
         if index == 2:
             self.lblIconAbout.setPixmap(QPixmap("static/icons/about_50.png"))    
+    
     def update_password_force(self, pass_: str):
         forca = calculate_force(pass_)  # retorn 0-100
         self.pBar.setValue(forca)
@@ -397,6 +388,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
             }}
         """
         )
+    
     def show_pwd(self):
         if self.edtPWD.echoMode() == QLineEdit.EchoMode.Password:
             self.edtPWD.setEchoMode(QLineEdit.EchoMode.Normal)
@@ -404,6 +396,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         else:
             self.edtPWD.setEchoMode(QLineEdit.EchoMode.Password)
             self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
+
     def record_status(self, status = None):
         # receives integer or None (_editing_id)
         if not status:
@@ -417,6 +410,30 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.edtSearch.setPlaceholderText(f"search by {name}")
         self.edtSearch.setFocus()
         self.lblSearchBy.setText(f"searching by {name}")
+    
+        def verify_password_before_change(self, typed_password: str) -> bool:
+            salt_bytes = base64.b64decode(self.state.crypto.salt_hash)
+            try_key = CryptoVault.derive_key(typed_password, salt_bytes)
+            db_hash_bytes = base64.b64decode(self.state.crypto.master_hash)
+            return try_key == db_hash_bytes
+
+    # def verify_password_before_change(self, typed_passdord: str) -> bool:
+    #     master = CryptoVault.get_master_hash()
+
+    #     if master is None:
+    #         print(f"any master returned")
+    #         return False
+        
+    #     db_hash = master.hash
+    #     db_salt = master.salt
+    #     salt_bytes = base64.b64decode(db_salt)
+    #     try_key = CryptoVault.derive_key(typed_hash, salt_bytes)
+    #     db_hash_bytes = base64.b64decode(db_hash)
+        
+    #     if try_key == db_hash_bytes:
+    #         return True
+    #     else:
+    #         return False        
     # endregion
 
     # region ── Qt overrides ──────────────────────────────
