@@ -60,13 +60,16 @@ class LoginWindow(BaseClass,Ui_MainWindow):
         typed_password = self.edtPWD.text()
 
         if self.login(typed_password):
-            app_state.crypto.decrypted_pass = typed_password   # global uses
-            server_thread = threading.Thread(target=run_server, daemon=True)
-            server_thread.start()
+            # start local IPC server to allow external components (e.g., extension) 
+            # to retrieve the master password at runtime
+            if not hasattr(self, "_server_started"):
+                self._server_started = True
+                server_thread = threading.Thread(target=run_server, daemon=True)
+                server_thread.start()
 
+            app_state.crypto.decrypted_pass = typed_password   # global uses
             self.accept()
             return
-
         
         self._attempts += 1
         remaining = _MAX_LOGIN_ATTEMPTS - self._attempts
