@@ -20,7 +20,10 @@
       <property name="currentIndex">
        <number>2</number>
       </property>
-      <widget class="QWidget" name="tab">
+      <widget class="QWidget" name="tab_search">
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
        <attribute name="title">
         <string>Search</string>
        </attribute>
@@ -653,6 +656,9 @@
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
          <widget class="QFrame" name="frame">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
           <property name="frameShape">
            <enum>QFrame::Shape::StyledPanel</enum>
           </property>
@@ -665,7 +671,7 @@
              <x>110</x>
              <y>278</y>
              <width>151</width>
-             <height>31</height>
+             <height>16</height>
             </rect>
            </property>
            <property name="font">
@@ -674,9 +680,7 @@
             </font>
            </property>
            <property name="text">
-            <string>Tito de Barros Junior
-1.0.0
-</string>
+            <string>Tito de Barros Junior</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
@@ -738,9 +742,9 @@ Email:
            <property name="geometry">
             <rect>
              <x>60</x>
-             <y>208</y>
+             <y>171</y>
              <width>621</width>
-             <height>41</height>
+             <height>50</height>
             </rect>
            </property>
            <property name="text">
@@ -758,7 +762,7 @@ Email:
             <rect>
              <x>118</x>
              <y>326</y>
-             <width>190</width>
+             <width>151</width>
              <height>16</height>
             </rect>
            </property>
@@ -772,10 +776,10 @@ Email:
           <widget class="QLabel" name="label_3">
            <property name="geometry">
             <rect>
-             <x>326</x>
-             <y>138</y>
+             <x>330</x>
+             <y>60</y>
              <width>121</width>
-             <height>31</height>
+             <height>40</height>
             </rect>
            </property>
            <property name="font">
@@ -794,9 +798,9 @@ Email:
            <property name="geometry">
             <rect>
              <x>60</x>
-             <y>187</y>
+             <y>150</y>
              <width>101</width>
-             <height>21</height>
+             <height>30</height>
             </rect>
            </property>
            <property name="font">
@@ -804,6 +808,11 @@ Email:
              <pointsize>12</pointsize>
              <bold>true</bold>
             </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">#label_7{
+color:rgb(130, 130, 130)
+}</string>
            </property>
            <property name="text">
             <string>HashedMaze</string>
@@ -817,7 +826,7 @@ Email:
             <rect>
              <x>100</x>
              <y>343</y>
-             <width>191</width>
+             <width>141</width>
              <height>16</height>
             </rect>
            </property>
@@ -833,7 +842,7 @@ Email:
             <rect>
              <x>110</x>
              <y>310</y>
-             <width>191</width>
+             <width>151</width>
              <height>16</height>
             </rect>
            </property>
@@ -842,6 +851,76 @@ Email:
            </property>
            <property name="openExternalLinks">
             <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QLabel" name="lblVersion">
+           <property name="geometry">
+            <rect>
+             <x>111</x>
+             <y>296</y>
+             <width>151</width>
+             <height>16</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>--version--</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+           </property>
+          </widget>
+          <widget class="QLabel" name="lblBG">
+           <property name="geometry">
+            <rect>
+             <x>270</x>
+             <y>260</y>
+             <width>541</width>
+             <height>251</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">border: 0.2px solid #00ff00; /* Um verde bem &quot;cheguei&quot; pra você não perder de vista */
+background-color: rgba(0, 255, 0, 10); /* Um fundo bem clarinho só pra marcar a área */</string>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::Shape::StyledPanel</enum>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="scaledContents">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_11">
+           <property name="geometry">
+            <rect>
+             <x>683</x>
+             <y>483</y>
+             <width>120</width>
+             <height>21</height>
+            </rect>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">#label_11{
+	background-color:rgb(45, 45, 45)
+}</string>
+           </property>
+           <property name="text">
+            <string>#HashedMaze</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
          </widget>

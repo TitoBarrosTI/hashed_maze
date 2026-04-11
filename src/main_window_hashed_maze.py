@@ -23,8 +23,7 @@ from PySide6.QtWidgets import (
     QLabel,
 )
 
-from src.config import db_path
-from src.database import SQLiteDB
+from src.config import db_path, APP_VERSION
 from src.popup_hint import PopupHint
 from src.crypt import CryptoVault
 from roundedframe import RoundedFrame
@@ -45,7 +44,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.pBar.setRange(0, 100)
         self.pBar.setTextVisible(False)
         self.lblCFGDatabaseDirectory.setText(db_path)
-
+        self.lblVersion.setText(APP_VERSION)
+        
         # decides which screen will be opened
         self._setup_initial_screen()
 
@@ -111,12 +111,13 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.edtPWD.textChanged.connect(self.update_password_force)
         self.btnShowPWD.clicked.connect(self.show_pwd)
 
-        # icons works
+        # icons and images works
         self.tabWidget.setCurrentIndex(2)
         self.tabWidget.currentChanged.connect(self.update_icon)
         self.update_icon(self.tabWidget.currentIndex())
         self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
         self.btnApply.setIcon(QIcon("static/icons/apply_20.png"))
+        self.lblBG.setPixmap(QPixmap("docs/screenshots/bgabout.jpg"))
 
         self.btnLnkReportABug.clicked.connect(self.open_bug_report)
         self.btnClose.clicked.connect(self.on_close_clicked)

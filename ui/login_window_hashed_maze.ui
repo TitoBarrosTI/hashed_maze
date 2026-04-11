@@ -35,7 +35,7 @@
        <enum>Qt::LayoutDirection::LeftToRight</enum>
       </property>
       <property name="text">
-       <string>teste</string>
+       <string/>
       </property>
       <property name="echoMode">
        <enum>QLineEdit::EchoMode::Password</enum>

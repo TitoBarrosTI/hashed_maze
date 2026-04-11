@@ -25,5 +25,6 @@ Thumbs.db
 
 # Others
 nomes_funcoes.txt
-listar_metodos.py
+list_methods.py
+list_folders.py
 debug.log

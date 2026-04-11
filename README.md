@@ -59,34 +59,53 @@ Built with Python and PySide6, it features a clean desktop interface, AES-256-GC
 ```
 hashed_maze/
 ├── docs/
-│   └── screenshots/          # App screenshots
+│   └── screenshots/
+│       ├── hashed_maze_about_tab.png
+│       ├── hashed_maze_config_tab.png
+│       ├── hashed_maze_master_password_register.png
+│       ├── hashed_maze_obtaining_password.png
+│       ├── hashed_maze_search_delete_item.png
+│       └── hashed_maze_search_tab.png
 ├── extension/
-│   ├── background.js         # Service worker (Chrome/Edge)
-│   ├── content.js            # Content script for autofill
-│   └── manifest.json         # Extension manifest (MV3)
+│   ├── background.js  # Service worker (Chrome/Edge)
+│   ├── content.js  # Content script for autofill
+│   └── manifest.json  # Extension manifest (MV3)
 ├── src/
+│   ├── core/
+│   │   └── state.py  # Centralized app state
 │   ├── native_messaging/
-│   │   └── registry.py       # Windows registry setup for Native Messaging
+│   │   └── registry.py  # Windows registry setup for Native Messaging
 │   ├── utils/
-│   │   ├── dialogs.py        # Reusable dialog helpers
+│   │   ├── dialogs.py  # Reusable dialog helpers
 │   │   ├── password_strength.py  # zxcvbn wrapper
 │   │   └── resource_path.py  # Path resolution for bundled assets
-│   ├── bridge.py             # Native Messaging host (Python ↔ Browser)
-│   ├── config.py             # App configuration constants
-│   ├── crypt.py              # AES-256-GCM encryption (CryptoVault)
-│   ├── database.py           # SQLite layer (SQLiteDB)
+│   ├── bridge.py  # Native Messaging host (Python ↔ Browser)
+│   ├── config.py  # App configuration constants
+│   ├── crypt.py  # AES-256-GCM encryption (CryptoVault)
+│   ├── database.py  # SQLite layer (SQLiteDB)
 │   ├── login_window_hashed_maze.py
 │   ├── main_window_hashed_maze.py
 │   ├── master_pass_hashed_maze.py
-│   └── models.py             # Data models
+│   ├── models.py  # Data models
+│   ├── password_server.py  # Local password server for extension
+│   ├── popup_hint.py  # Hover hint popup widget
+│   └── setup.py  # Native Messaging host registration
 ├── static/
-│   └── icons/                # UI icons
+│   └── icons/
+│       ├── about_50.png
+│       ├── apply_20.png
+│       ├── search_50.png
+│       ├── settings_50.png
+│       ├── visibility_20.png
+│       └── visibility_off_20.png
 ├── ui/
 │   ├── login_window_hashed_maze.ui
 │   ├── main_window_hashed_maze.ui
 │   └── master_pass_hashed_maze.ui
-├── main.py                   # Application entry point
-├── roundedframe.py           # Custom QFrame with rounded corners
+├── host_manifest.json  # Native Messaging host manifest
+├── main.py  # Application entry point
+├── roundedframe.py  # Custom QFrame with rounded corners
+├── run_bridge_python_host.bat  # Launches Native Messaging bridge
 ├── requirements.txt
 ├── LICENCE
 └── README.md
