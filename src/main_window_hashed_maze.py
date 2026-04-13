@@ -30,16 +30,17 @@ from roundedframe import RoundedFrame
 from src.utils.resource_path import resource_path
 from src.utils.password_strength import calculate_force
 from src.utils.dialogs import confirm_dialog
-from src.core.state import AppState, UIState
+from src.core.state import app_state # AppState
+from ui.helpers.animations import shake_widget
 
 # Resolve resource path for dev and PyInstaller (_MEIPASS) environments
-Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/main_window_hashed_maze.ui"))  # type: ignore
+Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/main_window_hashed_maze.ui"))  # type: ignore
 
 class MainWindow(BaseClass, Ui_MainWindow):
-    def __init__(self):
+    def __init__(self, app_state, parent=None):
         super().__init__()
         self.setupUi(self)
-        self.state = AppState(db_path)
+        self.state = app_state
         self.setFixedSize(self.size())
         self.pBar.setRange(0, 100)
         self.pBar.setTextVisible(False)
@@ -110,6 +111,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.btnCancel.clicked.connect(self.on_click_cancel)
         self.edtPWD.textChanged.connect(self.update_password_force)
         self.btnShowPWD.clicked.connect(self.show_pwd)
+        # self.btnSavePWD.clicked.connect(lambda: shake_widget(self, self.edtCurrentPWD))
+        self.btnSavePWD.clicked.connect(self.change_master_password)
 
         # icons and images works
         self.tabWidget.setCurrentIndex(2)
@@ -208,31 +211,44 @@ class MainWindow(BaseClass, Ui_MainWindow):
             print("general SQLite error:", e)
     
     def update_record(self, table: str, where: str):
-        if not self._required_fields_ok():
-            return (False, "Fill in the required field")
+        if table == 'credentials':
+            if not self._required_fields_ok():
+                return (False, "Fill in the required field")
 
-        if self.state.crypto.derived_key is None:
-            return
-        
-        vault = CryptoVault.encrypt(self.state.crypto.derived_key , self.edtPWD.text())
+            if self.state.crypto.derived_key is None:
+                return
+            
+            vault = CryptoVault.encrypt(self.state.crypto.derived_key , self.edtPWD.text())
 
-        data = {
-            "user": self.edtAccount.text(),
-            "url": self.edtURL.text(),
-            "notes": self.edtPlainNotes.toPlainText(),
-            "ciphertext": vault["ciphertext"],
-            "salt": vault["salt"],
-            "nonce": vault["nonce"],
-        }
+            data = {
+                "user": self.edtAccount.text(),
+                "url": self.edtURL.text(),
+                "notes": self.edtPlainNotes.toPlainText(),
+                "ciphertext": vault["ciphertext"],
+                "salt": vault["salt"],
+                "nonce": vault["nonce"],
+            }
+        elif table == "hash":
+            if not self.edtNewPWDConfirm.text():
+                return (False, "Fill in the required field")
+            
+            ret_hash = CryptoVault.generate_hash_login(self.edtNewPWDConfirm.text())
+
+            data = {
+                "mkhash": ret_hash[0],
+                "salt": ret_hash[1]
+            }
 
         try:
-            cols = ", ".join([f"{key} = ?" for key in data.keys()])
-            sql = f"UPDATE {table} SET {cols} WHERE {where} = ?"
-            # join the values of DICT with WHERE param
-            #.values() retrieves data in same order as the keys used above 
-            # values = list(data.values()) + [self.current_id]
-            values = list(data.values())
-            values.append(self.state.ui.current_id)
+            if table == 'hash':
+                cols = ", ".join([f"{key} = ?" for key in data.keys()])
+                sql = f"UPDATE {table} SET {cols}"
+                values = tuple(data.values())
+            else:
+                cols = ", ".join([f"{key} = ?" for key in data.keys()])
+                sql = f"UPDATE {table} SET {cols} WHERE {where} = ?"
+                values = list(data.values())
+                values.append(self.state.ui.current_id)
 
             self.state.db.execute(sql, tuple(values))
 
@@ -417,24 +433,6 @@ class MainWindow(BaseClass, Ui_MainWindow):
             try_key = CryptoVault.derive_key(typed_password, salt_bytes)
             db_hash_bytes = base64.b64decode(self.state.crypto.master_hash)
             return try_key == db_hash_bytes
-
-    # def verify_password_before_change(self, typed_passdord: str) -> bool:
-    #     master = CryptoVault.get_master_hash()
-
-    #     if master is None:
-    #         print(f"any master returned")
-    #         return False
-        
-    #     db_hash = master.hash
-    #     db_salt = master.salt
-    #     salt_bytes = base64.b64decode(db_salt)
-    #     try_key = CryptoVault.derive_key(typed_hash, salt_bytes)
-    #     db_hash_bytes = base64.b64decode(db_hash)
-        
-    #     if try_key == db_hash_bytes:
-    #         return True
-    #     else:
-    #         return False        
     # endregion
 
     # region ── Qt overrides ──────────────────────────────
@@ -480,11 +478,14 @@ class MainWindow(BaseClass, Ui_MainWindow):
         for w in lst_widgets:
             if isinstance(w, (QLineEdit, QPlainTextEdit)):
                 w.clear()
+    
     def fields_to_clean(self):
         return [self.edtAccount, self.edtURL, self.edtPWD, self.edtPlainNotes]
+    
     def on_action_finished(self):
         # Volta para a cor padrão do sistema (cinza)
         self.frmStatusEdition.set_status_colors(None)
+    
     def _required_fields_ok(self) -> bool:
         required = [self.edtAccount, self.edtURL, self.edtPWD]
         for w in required:
@@ -492,6 +493,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 w.setFocus()
                 return False
         return True
+    
     def on_edit_fields(self):
         self.btnApply.setEnabled(True)
         self.btnCancel.setEnabled(True)
@@ -508,6 +510,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.btnApply.setEnabled(True)
         self.btnCancel.setEnabled(True)
         self.record_status(1)
+    
     def on_click_cancel(self):
         self.record_status()
         self.handle_action_msg(lambda msg_input: (False, msg_input), "view mode")
@@ -534,12 +537,14 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 if key == 3: 
                     value = self.state.crypto.decrypted_pass
                 widget.setText(value)
+    
     def on_click_action(self, row_id: int, text: str, informative: str):
         if confirm_dialog(text, informative):
             self.state.db.execute("DELETE FROM credentials WHERE id = ?", (row_id,))
             self.search_credential(self.state.ui.search_field, self.edtSearch.text())
             self.btnSearch.click()
             self.clear_fields(self.fields_to_clean())
+    
     def handle_action_on_save_record(self):
         if self.state.ui.editing_id is None:
             ok, msg = self.insert_record("credentials")
@@ -550,6 +555,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.lblStatusEditionOrError.setStyleSheet(
             "color: rgb(127, 255, 0);" if ok else "color:silver;"
         )
+    
     def handle_action_msg(self, func, *args):
         ok, msg = func(*args)
 
@@ -558,12 +564,64 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.lblStatusEditionOrError.setStyleSheet(
             "color: rgb(127, 255, 0);" if ok else "color:silver;"
         )
+    
     def open_bug_report(self) -> None:
         QDesktopServices.openUrl(
-            QUrl("http://github.com/TitoBarrosTI/hashedmaze/issues/new")
+            QUrl("https://github.com/TitoBarrosTI/hashed_maze/issues/new")
         )
+    
+    def change_master_password(self):
+        self.lblMsgPWD.clear()
+        
+        # verifying current master password
+        typed = self.edtCurrentPWD.text().strip()
+        current = app_state.crypto.decrypted_pass
+        
+        if not typed:
+            self.edtCurrentPWD.setFocus()
+            self.lblMsgPWD.setText('Current password is empty')
+            shake_widget(self, self.edtCurrentPWD)
+            return
+
+        if not current == typed:
+            self.edtCurrentPWD.setFocus()
+            self.lblMsgPWD.setText(f'typed password {typed} is not correct')
+            shake_widget(self, self.edtCurrentPWD)
+            return
+        
+        # verifying new master password and confirmation
+        new = self.edtNewPWD.text().strip()
+        confirm = self.edtNewPWDConfirm.text().strip()
+
+        if not new == confirm:
+            self.lblMsgPWD.setText(f'new password {new} and confirm {confirm} is not equals')
+            shake_widget(self, self.edtNewPWD)
+            shake_widget(self, self.edtNewPWDConfirm)
+            return
+
+        fields = {
+            "current pwd": self.edtCurrentPWD,
+            "new pwd": self.edtNewPWD,
+            "confirm pwd": self.edtNewPWDConfirm,
+        }
+
+        for name, field in fields.items():
+            if not field.text().strip():
+                field.setFocus()
+                self.lblMsgPWD.setText(f'field {name} is empty')
+                shake_widget(self, field)
+                break
+        
+        result = self.update_record('hash','')
+        
+        if result is not None:
+            ok, msg = result
+            if ok:
+                self.lblMsgPWD.setText('Master password changed with success')
+            else:
+                self.lblMsgPWD.setText(f'error on process: {msg}')
+
     def on_close_clicked(self) -> None:
         self.close()    
     # endregion
-
 

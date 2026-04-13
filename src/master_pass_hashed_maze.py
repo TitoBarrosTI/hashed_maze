@@ -2,8 +2,6 @@
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
-from functools import partial
-
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QPushButton, QWidget, QDialog, QApplication, QVBoxLayout,
                                QLineEdit, QLabel, QProgressBar)
@@ -18,7 +16,7 @@ from src.database import SQLiteDB
 from src.utils.resource_path import resource_path
 
 # Resolve resource path for dev and PyInstaller (_MEIPASS) environments
-Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/master_pass_hashed_maze.ui"))  # type: ignore
+Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/master_pass_hashed_maze.ui"))  # type: ignore
 
 class MasterPass(QDialog,Ui_MainWindow):
     def __init__(self, parent=MainWindow):
@@ -106,6 +104,7 @@ class MasterPass(QDialog,Ui_MainWindow):
         else:
             self.edtMasterPass.setEchoMode(QLineEdit.EchoMode.Password)
             self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
+
 class MarqueeController:
     def __init__(self, widget, text, interval=100):
         self.widget = widget
