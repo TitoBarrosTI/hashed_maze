@@ -80,6 +80,7 @@ def listen():
             raw_length = sys.stdin.buffer.read(4)
             if not raw_length:
                 logging.info("Conexão fechada pelo navegador.")
+                logging.info("---------- FIM ----------")
                 break
             
             length = struct.unpack('I', raw_length)[0]

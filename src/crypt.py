@@ -62,7 +62,7 @@ class CryptoVault:
     @staticmethod
     def has_master_hash() -> bool | None:
         db = SQLiteDB(db_path)
-        logging.debug(f"Database path: {db.db_path}") # teste
+        logging.debug(f"Database path: {db.db_path}")
 
         result = db.fetch_one("SELECT COUNT(*) as total FROM hash")
         return result is not None and result['total'] > 0

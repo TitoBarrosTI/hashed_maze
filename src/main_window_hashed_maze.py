@@ -1,7 +1,8 @@
 # MCacheBox
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
-
+import os
+import base64
 import logging
 from doctest import master
 import sqlite3
@@ -115,13 +116,14 @@ class MainWindow(BaseClass, Ui_MainWindow):
         # self.btnSavePWD.clicked.connect(lambda: shake_widget(self, self.edtCurrentPWD))
         self.btnSavePWD.clicked.connect(self.change_master_password)
 
-        # icons and images works
+        # region ── icons and images works
         self.tabWidget.setCurrentIndex(2)
         self.tabWidget.currentChanged.connect(self.update_icon)
         self.update_icon(self.tabWidget.currentIndex())
         self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
         self.btnApply.setIcon(QIcon("static/icons/apply_20.png"))
         self.lblBG.setPixmap(QPixmap("docs/screenshots/bgabout.jpg"))
+        # endregion
 
         self.btnLnkReportABug.clicked.connect(self.open_bug_report)
         self.btnClose.clicked.connect(self.on_close_clicked)
@@ -288,7 +290,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         if self.state.crypto.derived_key is None:
             return 
         
-        vault = CryptoVault.encrypt(self.state.crypto.derived_key, self.edtPWD.text())
+        vault = CryptoVault.encrypt(self.state.crypto.decrypted_pass, self.edtPWD.text())
 
         payload = {
             "user": self.edtAccount.text(),
@@ -337,12 +339,11 @@ class MainWindow(BaseClass, Ui_MainWindow):
                     if self.state.crypto.derived_key is None:
                         return
 
-                    self.state.crypto.decrypted_pass = CryptoVault.decrypt(self.state.crypto.derived_key, data_)
-
-                    widget.setText(str(self.state.crypto.decrypted_pass))
+                    plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_)
+                    widget.setText(str(plaintext))
                 continue
             
-            value = item.text(col_index)            
+            value = item.text(col_index)
 
             if isinstance(widget, (QLineEdit, QLabel)):
                  widget.setText(str(value))
@@ -618,10 +619,6 @@ class MainWindow(BaseClass, Ui_MainWindow):
         logging.debug(f"Starting re-encryption for {len(rows)} credentials")
         for row in rows:
             data_ = {"ciphertext": row["ciphertext"], "salt": row["salt"], "nonce": row["nonce"]}
-            # plaintext = CryptoVault.decrypt(typed, data_)
-            # new_vault = CryptoVault.encrypt(new, plaintext)
-
-            # teste
             plaintext = CryptoVault.decrypt(self.state.crypto.derived_key, data_)
             new_vault = CryptoVault.encrypt(new, plaintext)
 
@@ -631,6 +628,17 @@ class MainWindow(BaseClass, Ui_MainWindow):
             )
 
             logging.debug(f"Re-encrypting credential id={row['id']}")
+
+        # region (obtainning updated data of crypto state)
+        session_salt = os.urandom(16)
+        new_derived  = CryptoVault.derive_key(new, session_salt)
+        new_master_hash = CryptoVault.generate_hash_login(new)
+
+        app_state.crypto.salt_hash      = base64.b64encode(session_salt) #.decode()
+        app_state.crypto.derived_key    = base64.b64encode(new_derived).decode()
+        app_state.crypto.master_hash    = new_master_hash[0]
+        app_state.crypto.decrypted_pass = new
+        # endregion
 
         result = self.update_record('hash','')
         

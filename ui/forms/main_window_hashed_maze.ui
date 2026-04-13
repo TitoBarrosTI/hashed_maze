@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_search">
        <property name="styleSheet">
@@ -187,6 +187,11 @@
               <width>231</width>
               <height>181</height>
              </rect>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QPlainTextEdit{
+background-color:rgb(55, 55, 55)
+}</string>
             </property>
            </widget>
            <widget class="QLabel" name="label">
