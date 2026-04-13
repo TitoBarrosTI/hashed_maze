@@ -25,5 +25,4 @@ class AppState:
         self.crypto = CryptoState()
         self.ui = UIState()
 
-# from src.config import db_path
 app_state = AppState(db_path)

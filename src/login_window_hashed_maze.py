@@ -5,6 +5,7 @@
 from PySide6.QtCore import QByteArray
 from PySide6.QtSvgWidgets import QSvgWidget
 
+import threading
 import base64
 from PySide6.QtGui import QWindowStateChangeEvent, QIcon
 from PySide6.QtWidgets import QWidget, QLineEdit
@@ -12,18 +13,15 @@ from PySide6.QtUiTools import loadUiType
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QPoint, QEasingCurve
 from PySide6.QtSvgWidgets import QSvgWidget
 
-# from src.core.state import AppState
 from src.main_window_hashed_maze import MainWindow
 from src.crypt import CryptoVault
 from src.utils.resource_path import resource_path
-
-import threading
 from src.password_server import run_server
 from src.core.state import app_state
-
+from ui.helpers.animations import shake_widget
 
 # Resolve resource path for dev and PyInstaller (_MEIPASS) environments
-Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/login_window_hashed_maze.ui"))  # type: ignore
+Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/login_window_hashed_maze.ui"))  # type: ignore
 
 _MAX_LOGIN_ATTEMPTS = 3
 
@@ -67,7 +65,7 @@ class LoginWindow(BaseClass,Ui_MainWindow):
                 server_thread = threading.Thread(target=run_server, daemon=True)
                 server_thread.start()
 
-            app_state.crypto.decrypted_pass = typed_password   # global uses
+            self.app_state.crypto.decrypted_pass = typed_password   # global uses
             self.accept()
             return
         
@@ -79,7 +77,7 @@ class LoginWindow(BaseClass,Ui_MainWindow):
             return
         
         self.lblMsg.setText(f"Previous login attempt was unsuccessful, {remaining} attempts remaining.")
-        self._shake()
+        shake_widget(self, self.edtPWD)
         self.edtPWD.clear()
         self.edtPWD.setFocus()
 
@@ -170,15 +168,3 @@ class LoginWindow(BaseClass,Ui_MainWindow):
         color = self._BORDER_COLORS[self._border_step % len(self._BORDER_COLORS)]
         self.edtPWD.setStyleSheet(f"QLineEdit {{ border: 0.5px solid {color}; border-radius: 4px; }}")
         self._border_step += 1
-
-    # --- shake ---
-
-    def _shake(self):
-        origin = self.edtPWD.pos()
-        self._shake_anim = QPropertyAnimation(self.edtPWD, b"pos")
-        self._shake_anim.setDuration(300)
-        offsets = [8, -8, 6, -6, 4, -4, 0]
-        self._shake_anim.setKeyValueAt(0, origin)
-        for i, dx in enumerate(offsets):
-            self._shake_anim.setKeyValueAt((i + 1) / len(offsets), QPoint(origin.x() + dx, origin.y()))
-        self._shake_anim.start(QPropertyAnimation.DeletionPolicy.DeleteWhenStopped)

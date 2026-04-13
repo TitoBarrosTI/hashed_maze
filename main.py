@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QApplication
 from src.main_window_hashed_maze import MainWindow
 from src.core.single_instance import is_already_running
 from src.utils.dialogs import info_dialog
+from src.core.state import app_state
 
 app = QApplication([])
 
@@ -21,6 +22,6 @@ if is_already_running():
 
 run_setup()
 
-window = MainWindow()
+window = MainWindow(app_state)
 
 app.exec()
