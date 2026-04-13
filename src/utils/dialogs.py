@@ -4,9 +4,10 @@
 
 from PySide6.QtWidgets import (QMessageBox)
 
-def confirm_dialog(text: str, informative: str = "") -> bool:
+def confirm_dialog(text: str, informative: str = "", title = "Hashed Maze — Password Vault") -> bool:
     msgBx = QMessageBox()
     msgBx.setText(text)
+    msgBx.setWindowTitle(title)
     if informative:
         msgBx.setInformativeText(informative)
     msgBx.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)

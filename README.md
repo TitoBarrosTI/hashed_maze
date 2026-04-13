@@ -72,6 +72,7 @@ hashed_maze/
 │   └── manifest.json  # Extension manifest (MV3)
 ├── src/
 │   ├── core/
+│   │   ├── single_instance.py  # Ensures single instance execution
 │   │   └── state.py  # Centralized app state
 │   ├── native_messaging/
 │   │   └── registry.py  # Windows registry setup for Native Messaging
@@ -99,9 +100,12 @@ hashed_maze/
 │       ├── visibility_20.png
 │       └── visibility_off_20.png
 ├── ui/
-│   ├── login_window_hashed_maze.ui
-│   ├── main_window_hashed_maze.ui
-│   └── master_pass_hashed_maze.ui
+│   ├── forms/
+│   │   ├── login_window_hashed_maze.ui
+│   │   ├── main_window_hashed_maze.ui
+│   │   └── master_pass_hashed_maze.ui
+│   └── helpers/
+│       └── animations.py
 ├── host_manifest.json  # Native Messaging host manifest
 ├── main.py  # Application entry point
 ├── roundedframe.py  # Custom QFrame with rounded corners

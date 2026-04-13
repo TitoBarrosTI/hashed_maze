@@ -2,6 +2,7 @@
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
+import logging
 from doctest import master
 import sqlite3
 from functools import partial
@@ -218,7 +219,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
             if self.state.crypto.derived_key is None:
                 return
             
-            vault = CryptoVault.encrypt(self.state.crypto.derived_key , self.edtPWD.text())
+            vault = CryptoVault.encrypt(self.state.crypto.decrypted_pass, self.edtPWD.text())
 
             data = {
                 "user": self.edtAccount.text(),
@@ -612,6 +613,25 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 shake_widget(self, field)
                 break
         
+        # re-encrypt all credentials with new password
+        rows = self.state.db.fetch_all("SELECT id, ciphertext, salt, nonce FROM credentials")
+        logging.debug(f"Starting re-encryption for {len(rows)} credentials")
+        for row in rows:
+            data_ = {"ciphertext": row["ciphertext"], "salt": row["salt"], "nonce": row["nonce"]}
+            # plaintext = CryptoVault.decrypt(typed, data_)
+            # new_vault = CryptoVault.encrypt(new, plaintext)
+
+            # teste
+            plaintext = CryptoVault.decrypt(self.state.crypto.derived_key, data_)
+            new_vault = CryptoVault.encrypt(new, plaintext)
+
+            self.state.db.execute(
+                "UPDATE credentials SET ciphertext=?, salt=?, nonce=? WHERE id=?",
+                (new_vault["ciphertext"], new_vault["salt"], new_vault["nonce"], row["id"])
+            )
+
+            logging.debug(f"Re-encrypting credential id={row['id']}")
+
         result = self.update_record('hash','')
         
         if result is not None:

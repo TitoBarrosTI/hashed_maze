@@ -5,6 +5,7 @@ import sqlite3
 import os
 import logging
 import socket
+import traceback
 
 # primeiríssima linha após os imports do stdlib
 LOG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "debug.log")
@@ -67,6 +68,7 @@ def get_password_from_db(url):
         return None
     except Exception as e:
         logging.error(f"Unexpected error retrieving password: {e}")
+        logging.debug(traceback.format_exc())
         return None
     
 def listen():
@@ -93,7 +95,12 @@ def listen():
                 senha_recuperada = get_password_from_db(message['url'])
                 
                 # Assembling the JSON response
-                response_dict = {"password": senha_recuperada}
+                if senha_recuperada is None:
+                    response_dict = {"status": "error", "reason": "app_locked"}
+                else:
+                    response_dict = {"status": "ok", "password": senha_recuperada}
+
+                # response_dict = {"password": senha_recuperada}
                 response_json = json.dumps(response_dict).encode('utf-8')
                 
                 # Sending back to Edge (Size + Content)
@@ -119,13 +126,16 @@ def get_master_password():
         client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client.connect(("127.0.0.1", 5001))
         client.sendall(b"GET_MASTER_PASSWORD")
-        response = client.recv(4096).decode()
+        response = client.recv(4096).decode().strip()
         client.close()
 
         if response.startswith("ERROR"):
             logging.error(response)
             return None
         return response
+    except ConnectionRefusedError:
+        logging.error("HashedMaze app is not running or user is not logged in.")
+        return None    
     except Exception as e:
         logging.error(f"Failed to obtain the master password: {e}")
         return None

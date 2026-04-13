@@ -21,7 +21,6 @@ def run_setup():
         ]
     }
 
-    # "chrome-extension://gaoienohpdkolcghibinejpjmmdnkfcb/"
     manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     # Register on Edge
@@ -29,7 +28,6 @@ def run_setup():
 
     # Register on Chrome
     _register(REGISTRY_KEY_CHROME, str(manifest_path))
-
 
 def _register(key_path: str, manifest_path: str):
     try:
