@@ -57,7 +57,7 @@ class PopupHelp(QFrame):
     def __init__(self, title: str, body: str, dark_mode: bool = True, parent=None):
         super().__init__(
             parent,
-            Qt.WindowType.Popup |
+            Qt.WindowType.ToolTip |
             Qt.WindowType.FramelessWindowHint,
         )
         self.setObjectName("help_root")
