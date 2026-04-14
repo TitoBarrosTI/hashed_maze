@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_search">
        <property name="styleSheet">
@@ -40,7 +40,7 @@
            <property name="geometry">
             <rect>
              <x>20</x>
-             <y>20</y>
+             <y>25</y>
              <width>91</width>
              <height>25</height>
             </rect>
@@ -53,7 +53,7 @@
            <property name="geometry">
             <rect>
              <x>210</x>
-             <y>22</y>
+             <y>27</y>
              <width>371</width>
              <height>21</height>
             </rect>
@@ -103,7 +103,7 @@
            <property name="geometry">
             <rect>
              <x>120</x>
-             <y>20</y>
+             <y>25</y>
              <width>79</width>
              <height>24</height>
             </rect>
@@ -115,7 +115,7 @@
           <widget class="QLabel" name="lblIconSearch">
            <property name="geometry">
             <rect>
-             <x>780</x>
+             <x>760</x>
              <y>10</y>
              <width>41</width>
              <height>41</height>
@@ -182,7 +182,7 @@
            <widget class="QPlainTextEdit" name="edtPlainNotes">
             <property name="geometry">
              <rect>
-              <x>557</x>
+              <x>550</x>
               <y>20</y>
               <width>231</width>
               <height>181</height>
@@ -335,6 +335,19 @@ background-color:rgb(55, 55, 55)
              <string>cancel</string>
             </property>
            </widget>
+           <widget class="QPushButton" name="btnHelpCredentials">
+            <property name="geometry">
+             <rect>
+              <x>786</x>
+              <y>3</y>
+              <width>21</width>
+              <height>24</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>?</string>
+            </property>
+           </widget>
           </widget>
           <widget class="QLabel" name="lblStatusEditionOrError">
            <property name="geometry">
@@ -353,7 +366,7 @@ background-color:rgb(55, 55, 55)
            <property name="geometry">
             <rect>
              <x>212</x>
-             <y>44</y>
+             <y>49</y>
              <width>361</width>
              <height>16</height>
             </rect>
@@ -391,6 +404,19 @@ background-color:rgb(55, 55, 55)
             <string>...</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="btnHelpSearch">
+           <property name="geometry">
+            <rect>
+             <x>809</x>
+             <y>3</y>
+             <width>21</width>
+             <height>24</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>?</string>
+           </property>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -411,7 +437,7 @@ background-color:rgb(55, 55, 55)
           <widget class="QLabel" name="lblIconConfig">
            <property name="geometry">
             <rect>
-             <x>770</x>
+             <x>750</x>
              <y>0</y>
              <width>60</width>
              <height>61</height>
@@ -431,7 +457,7 @@ background-color:rgb(55, 55, 55)
             </rect>
            </property>
            <property name="title">
-            <string> General </string>
+            <string> General configuration </string>
            </property>
            <widget class="QComboBox" name="cbxDefaultFieldSearch">
             <property name="geometry">
@@ -506,6 +532,9 @@ background-color:rgb(55, 55, 55)
               <height>24</height>
              </rect>
             </property>
+            <property name="maxVisibleItems">
+             <number>0</number>
+            </property>
             <item>
              <property name="text">
               <string>-- select a field --</string>
@@ -531,6 +560,19 @@ background-color:rgb(55, 55, 55)
               <string>notes</string>
              </property>
             </item>
+           </widget>
+           <widget class="QPushButton" name="btnGeneralCFG">
+            <property name="geometry">
+             <rect>
+              <x>586</x>
+              <y>13</y>
+              <width>21</width>
+              <height>24</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>?</string>
+            </property>
            </widget>
           </widget>
           <widget class="QLabel" name="lblCFGDatabaseDirectory">
@@ -577,7 +619,7 @@ background-color:rgb(55, 55, 55)
             </rect>
            </property>
            <property name="title">
-            <string> Manage password </string>
+            <string> Manage master password </string>
            </property>
            <widget class="QLineEdit" name="edtCurrentPWD">
             <property name="geometry">
@@ -658,6 +700,19 @@ background-color:rgb(55, 55, 55)
              <string>repeat new password</string>
             </property>
            </widget>
+           <widget class="QPushButton" name="btnManagerPWDCFG">
+            <property name="geometry">
+             <rect>
+              <x>586</x>
+              <y>13</y>
+              <width>21</width>
+              <height>24</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>?</string>
+            </property>
+           </widget>
           </widget>
          </widget>
         </item>
@@ -703,7 +758,7 @@ background-color:rgb(55, 55, 55)
           <widget class="QLabel" name="lblIconAbout">
            <property name="geometry">
             <rect>
-             <x>770</x>
+             <x>750</x>
              <y>0</y>
              <width>60</width>
              <height>61</height>

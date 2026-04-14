@@ -34,6 +34,7 @@ from src.utils.password_strength import calculate_force
 from src.utils.dialogs import confirm_dialog
 from src.core.state import app_state # AppState
 from ui.helpers.animations import shake_widget
+from src.popup_help import PopupHelp
 
 # Resolve resource path for dev and PyInstaller (_MEIPASS) environments
 Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/main_window_hashed_maze.ui"))  # type: ignore
@@ -90,11 +91,58 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.btnSearch.clicked.connect(
             lambda: self.search_credential(self.state.ui.search_field, self.edtSearch.text())
         )
-        # endregion
 
         self.edtSearch.returnPressed.connect(
             lambda: self.search_credential(self.state.ui.search_field, self.edtSearch.text())
         )
+
+        self._help_search = PopupHelp(
+            title="SEARCH",
+            body="Use 'search by' to filter by a specific field\n"
+                "(account, url, notes) or search across all fields.\n"
+                "Type and press 'search' to find your credentials.",
+            dark_mode=True,
+        )
+
+        self._help_credentials = PopupHelp(
+            title="CREDENTIALS",
+            body="Click any result above to load its data here.\n"
+                "Edit the fields and press 'apply' to save changes.\n"
+                "Use 'new' to create a fresh credential entry.",
+            dark_mode=True,
+        )
+
+        self._help_general_config = PopupHelp(
+            title="GENERAL CONFIGURATION",
+            body="Define the default field for searches and how\n"
+                "results are filtered. Changes apply immediately\n"
+                "on the next search.",
+            dark_mode=True,
+        )
+
+        self._help_manage_password = PopupHelp(
+            title="MANAGE MASTER PASSWORD",
+            body="To change your master password, enter your\n"
+                "current password, then type and confirm\n"
+                "the new one. All credentials will be\n"
+                "re-encrypted automatically.",
+            dark_mode=True,
+        )
+
+        self.btnHelpSearch.clicked.connect(
+            lambda: self._help_search.show_near(self.btnHelpSearch)
+        )
+        self.btnHelpCredentials.clicked.connect(
+            lambda: self._help_credentials.show_near(self.btnHelpCredentials)
+        )
+
+        self.btnGeneralCFG.clicked.connect(
+            lambda: self._help_general_config.show_near(self.btnGeneralCFG)
+        )
+        self.btnManagerPWDCFG.clicked.connect(
+            lambda: self._help_manage_password.show_near(self.btnManagerPWDCFG)
+        )
+        # endregion
 
         # target fields for tree item data
         # (It must follow the same order as displayed in the TreeView.)
@@ -316,7 +364,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
     
     def load_data_row(self, mapping: dict, item, _) -> None:
         # visual feedback
-        self.record_status(1)
+        self.visual_feedback_on_record_status(1)
         self.state.ui.current_id = item.data(0, Qt.ItemDataRole.UserRole)
         self.state.ui.editing_id = self.state.ui.current_id # flag edition
         data_items = item.data(1, Qt.ItemDataRole.UserRole)
@@ -416,25 +464,26 @@ class MainWindow(BaseClass, Ui_MainWindow):
             self.edtPWD.setEchoMode(QLineEdit.EchoMode.Password)
             self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
 
-    def record_status(self, status = None):
+    def visual_feedback_on_record_status(self, status = None):
         # receives integer or None (_editing_id)
         if not status:
             self.frmStatusEdition.set_status_colors(None)
         else:
             self.frmStatusEdition.set_status_colors("#b7d9b1", "#a3c9a0", "#92b68f")
-    # after select option in context menu search
+    
     def set_value_search_variable(self, name) -> None:
+        # after select option in context menu search
         self.state.ui.search_field = name
         self.edtSearch.clear()
         self.edtSearch.setPlaceholderText(f"search by {name}")
         self.edtSearch.setFocus()
         self.lblSearchBy.setText(f"searching by {name}")
     
-        def verify_password_before_change(self, typed_password: str) -> bool:
-            salt_bytes = base64.b64decode(self.state.crypto.salt_hash)
-            try_key = CryptoVault.derive_key(typed_password, salt_bytes)
-            db_hash_bytes = base64.b64decode(self.state.crypto.master_hash)
-            return try_key == db_hash_bytes
+    def verify_password_before_change(self, typed_password: str) -> bool:
+        salt_bytes = base64.b64decode(self.state.crypto.salt_hash)
+        try_key = CryptoVault.derive_key(typed_password, salt_bytes)
+        db_hash_bytes = base64.b64decode(self.state.crypto.master_hash)
+        return try_key == db_hash_bytes
     # endregion
 
     # region ── Qt overrides ──────────────────────────────
@@ -511,10 +560,10 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.handle_action_msg(lambda msg_input: (True, msg_input), "insert mode")
         self.btnApply.setEnabled(True)
         self.btnCancel.setEnabled(True)
-        self.record_status(1)
+        self.visual_feedback_on_record_status(1)
     
     def on_click_cancel(self):
-        self.record_status()
+        self.visual_feedback_on_record_status()
         self.handle_action_msg(lambda msg_input: (False, msg_input), "view mode")
         self.btnApply.setEnabled(False)
         self.btnCancel.setEnabled(False)
@@ -535,8 +584,9 @@ class MainWindow(BaseClass, Ui_MainWindow):
             if hasattr(widget, "setPlainText"):
                 widget.setPlainText(value)
             else:
-                # if it's ciphertext only
-                if key == 3: 
+                # if it's ciphertext only and has listed items
+                if key == 3 and not self.state.ui.current_id is None:
+                # (self.treeCredentialsResponse.topLevelItemCount() > 0):
                     value = self.state.crypto.decrypted_pass
                 widget.setText(value)
     
@@ -561,7 +611,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
     def handle_action_msg(self, func, *args):
         ok, msg = func(*args)
 
-        self.record_status(ok)
+        self.visual_feedback_on_record_status(ok)
         self.lblStatusEditionOrError.setText(msg)
         self.lblStatusEditionOrError.setStyleSheet(
             "color: rgb(127, 255, 0);" if ok else "color:silver;"
