@@ -45,6 +45,9 @@
              <height>25</height>
             </rect>
            </property>
+           <property name="statusTip">
+            <string>select the search field</string>
+           </property>
            <property name="text">
             <string>search by</string>
            </property>
@@ -176,7 +179,7 @@
              <enum>QLineEdit::EchoMode::Password</enum>
             </property>
             <property name="placeholderText">
-             <string>change your password</string>
+             <string>type/change your password</string>
             </property>
            </widget>
            <widget class="QPlainTextEdit" name="edtPlainNotes">
@@ -259,7 +262,10 @@ background-color:rgb(55, 55, 55)
              </rect>
             </property>
             <property name="toolTip">
-             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;show/hide password&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             <string/>
+            </property>
+            <property name="statusTip">
+             <string>show/hide password</string>
             </property>
             <property name="text">
              <string/>
@@ -274,6 +280,9 @@ background-color:rgb(55, 55, 55)
               <height>24</height>
              </rect>
             </property>
+            <property name="statusTip">
+             <string>Click to start a new credential</string>
+            </property>
             <property name="text">
              <string>new</string>
             </property>
@@ -281,11 +290,14 @@ background-color:rgb(55, 55, 55)
            <widget class="QProgressBar" name="pBar">
             <property name="geometry">
              <rect>
-              <x>276</x>
+              <x>370</x>
               <y>140</y>
               <width>118</width>
               <height>23</height>
              </rect>
+            </property>
+            <property name="statusTip">
+             <string>password strength</string>
             </property>
             <property name="maximum">
              <number>0</number>
@@ -344,8 +356,33 @@ background-color:rgb(55, 55, 55)
               <height>24</height>
              </rect>
             </property>
+            <property name="toolTip">
+             <string/>
+            </property>
+            <property name="statusTip">
+             <string/>
+            </property>
             <property name="text">
              <string>?</string>
+            </property>
+           </widget>
+           <widget class="QPushButton" name="btnGenRandomPWD">
+            <property name="geometry">
+             <rect>
+              <x>270</x>
+              <y>140</y>
+              <width>87</width>
+              <height>24</height>
+             </rect>
+            </property>
+            <property name="toolTip">
+             <string/>
+            </property>
+            <property name="statusTip">
+             <string>click to generate a random password</string>
+            </property>
+            <property name="text">
+             <string>random pass</string>
             </property>
            </widget>
           </widget>
@@ -412,6 +449,12 @@ background-color:rgb(55, 55, 55)
              <width>21</width>
              <height>24</height>
             </rect>
+           </property>
+           <property name="toolTip">
+            <string/>
+           </property>
+           <property name="statusTip">
+            <string/>
            </property>
            <property name="text">
             <string>?</string>
@@ -570,6 +613,12 @@ background-color:rgb(55, 55, 55)
               <height>24</height>
              </rect>
             </property>
+            <property name="toolTip">
+             <string/>
+            </property>
+            <property name="statusTip">
+             <string/>
+            </property>
             <property name="text">
              <string>?</string>
             </property>
@@ -708,6 +757,12 @@ background-color:rgb(55, 55, 55)
               <width>21</width>
               <height>24</height>
              </rect>
+            </property>
+            <property name="toolTip">
+             <string/>
+            </property>
+            <property name="statusTip">
+             <string/>
             </property>
             <property name="text">
              <string>?</string>
