@@ -27,7 +27,7 @@ from PySide6.QtWidgets import (
 
 from src.config import db_path, APP_VERSION
 from src.popup_hint import PopupHint
-from src.crypt import CryptoVault
+from src.crypt import CryptoVault, generate_random_password
 from roundedframe import RoundedFrame
 from src.utils.resource_path import resource_path
 from src.utils.password_strength import calculate_force
@@ -129,20 +129,18 @@ class MainWindow(BaseClass, Ui_MainWindow):
             dark_mode=True,
         )
 
-        self.btnHelpSearch.clicked.connect(
-            lambda: self._help_search.show_near(self.btnHelpSearch)
-        )
-        self.btnHelpCredentials.clicked.connect(
-            lambda: self._help_credentials.show_near(self.btnHelpCredentials)
-        )
+        self.btnHelpSearch.enterEvent = lambda e: self._help_search.show_near(self.btnHelpSearch)
+        self.btnHelpSearch.leaveEvent = lambda e: self._help_search.close()
 
-        self.btnGeneralCFG.clicked.connect(
-            lambda: self._help_general_config.show_near(self.btnGeneralCFG)
-        )
-        self.btnManagerPWDCFG.clicked.connect(
-            lambda: self._help_manage_password.show_near(self.btnManagerPWDCFG)
-        )
-        # endregion
+        self.btnHelpCredentials.enterEvent = lambda e: self._help_credentials.show_near(self.btnHelpCredentials)
+        self.btnHelpCredentials.leaveEvent = lambda e: self._help_credentials.close()
+
+        self.btnGeneralCFG.enterEvent = lambda e: self._help_general_config.show_near(self.btnGeneralCFG)
+        self.btnGeneralCFG.leaveEvent = lambda e: self._help_general_config.close()
+
+        self.btnManagerPWDCFG.enterEvent = lambda e: self._help_manage_password.show_near(self.btnManagerPWDCFG)
+        self.btnManagerPWDCFG.leaveEvent = lambda e: self._help_manage_password.close()                        
+        # endregion signal/slot connections
 
         # target fields for tree item data
         # (It must follow the same order as displayed in the TreeView.)
