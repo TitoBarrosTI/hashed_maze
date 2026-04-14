@@ -80,3 +80,28 @@ class CryptoVault:
     def hash_login_verify(typed_password, salt_db, hash_db):
         novo_hash = CryptoVault.derive_key(typed_password, salt_db)
         return hmac.compare_digest(novo_hash, hash_db)
+    
+def generate_random_password(width=15,numbers=True,symbols=True,capitalLetters=True) -> str:
+    import secrets
+    import string
+
+    base = string.ascii_lowercase
+
+    if width < 1:
+        width = 15
+    
+    map = {
+        "numbers": string.digits,
+        "symbols": string.punctuation,
+        "capitalLetters": string.ascii_uppercase
+    }
+
+    flags = {
+        "numbers": bool(numbers),
+        "symbols": bool(symbols),
+        "capitalLetters": bool(capitalLetters)
+    }
+    
+    chars = base + "".join(map[k] for k in flags if flags[k] is True)
+
+    return ''.join(secrets.choice(chars) for _ in range(width))    
