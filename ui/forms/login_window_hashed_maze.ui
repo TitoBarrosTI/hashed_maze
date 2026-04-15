@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>403</width>
+    <width>424</width>
     <height>229</height>
    </rect>
   </property>
@@ -25,8 +25,8 @@
      <widget class="QLineEdit" name="edtPWD">
       <property name="geometry">
        <rect>
-        <x>50</x>
-        <y>61</y>
+        <x>49</x>
+        <y>68</y>
         <width>251</width>
         <height>21</height>
        </rect>
@@ -44,8 +44,8 @@
      <widget class="QLabel" name="label">
       <property name="geometry">
        <rect>
-        <x>50</x>
-        <y>40</y>
+        <x>49</x>
+        <y>47</y>
         <width>141</width>
         <height>16</height>
        </rect>
@@ -57,9 +57,9 @@
      <widget class="QLabel" name="lblMsg">
       <property name="geometry">
        <rect>
-        <x>50</x>
-        <y>90</y>
-        <width>321</width>
+        <x>49</x>
+        <y>97</y>
+        <width>331</width>
         <height>16</height>
        </rect>
       </property>
@@ -86,8 +86,8 @@
      <widget class="QPushButton" name="btnShowPWD">
       <property name="geometry">
        <rect>
-        <x>304</x>
-        <y>60</y>
+        <x>303</x>
+        <y>67</y>
         <width>23</width>
         <height>24</height>
        </rect>
@@ -97,6 +97,28 @@
       </property>
       <property name="text">
        <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblWarning">
+      <property name="geometry">
+       <rect>
+        <x>49</x>
+        <y>119</y>
+        <width>341</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">lblWarning{
+	color: rgb(255, 255, 0)
+	visibility:hidden;
+}</string>
+      </property>
+      <property name="text">
+       <string>The database will be wiped after three unsuccessful attempts</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
       </property>
      </widget>
     </widget>

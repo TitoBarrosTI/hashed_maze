@@ -164,14 +164,14 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.btnShowPWD.clicked.connect(self.show_pwd)
         self.btnSavePWD.clicked.connect(self.change_master_password)
 
-        # region ── icons and images works
+        # region ── icons/images tasks
         self.tabWidget.setCurrentIndex(2)
         self.tabWidget.currentChanged.connect(self.update_icon)
         self.update_icon(self.tabWidget.currentIndex())
         self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
         self.btnApply.setIcon(QIcon("static/icons/apply_20.png"))
         self.lblBG.setPixmap(QPixmap("docs/screenshots/bgabout.jpg"))
-        # endregion
+        # endregion ── icons/images tasks
 
         self.btnLnkReportABug.clicked.connect(self.open_bug_report)
         self.btnClose.clicked.connect(self.on_close_clicked)

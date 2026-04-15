@@ -33,7 +33,6 @@ _LOCK_SVG = b"""
 </svg>
 """
 class LoginWindow(BaseClass,Ui_MainWindow):
-    # def __init__(self, master_hash, salt, parent=MainWindow):
     def __init__(self, app_state, parent=MainWindow):
         super().__init__()
         self.setupUi(self)
@@ -49,8 +48,10 @@ class LoginWindow(BaseClass,Ui_MainWindow):
         self.btnBox.button(self.btnBox.StandardButton.Ok).clicked.connect(self.handle_login)
         self.btnShowPWD.clicked.connect(self.show_pwd)
 
-        # icons works
+        # icon/label tasks
         self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
+        self.lblWarning.setVisible(False)
+        self.lblMsg.setText('')
 
     # --- login logic ---
 
@@ -72,10 +73,26 @@ class LoginWindow(BaseClass,Ui_MainWindow):
         self._attempts += 1
         remaining = _MAX_LOGIN_ATTEMPTS - self._attempts
 
+        # Login attempt warnings
+        warning_map = {
+            2: ("The database will be wiped after three unsuccessful attempts", "rgb(233, 255, 38)"),
+            1: ("** WARNING **\n Database will be deleted if this attempt is unsuccessful", "rgb(255, 122, 114)")
+        }
+
+        self.lblWarning.setVisible(remaining in warning_map)
+        
+        if remaining in warning_map:
+            text, color = warning_map[remaining]
+            self.lblWarning.setText(text)
+            self.lblWarning.setStyleSheet(f"color: {color};")
+            self.lblWarning.setVisible(True)
+        
+        # will delete database
         if remaining <= 0:
             self._wipe_and_reject()
             return
         
+        self.lblMsg.setVisible(True)
         self.lblMsg.setText(f"Previous login attempt was unsuccessful, {remaining} attempts remaining.")
         shake_widget(self, self.edtPWD)
         self.edtPWD.clear()
@@ -99,8 +116,8 @@ class LoginWindow(BaseClass,Ui_MainWindow):
         
         return False
        
-    # prevent window maximization
     def changeEvent(self, event):
+        # prevent window maximization
         if isinstance(event, QWindowStateChangeEvent):
             if self.windowState() & Qt.WindowState.WindowMaximized:
                 self.setWindowState(Qt.WindowState.WindowNoState)
@@ -136,20 +153,6 @@ class LoginWindow(BaseClass,Ui_MainWindow):
         self._svg.setGeometry(x, y, size, size)
         self.lblIconPad.hide()    
     
-    def _setup_icon_OLD(self):
-        self._svg = QSvgWidget(self.lblIconPad)
-        self._svg.load(QByteArray(_LOCK_SVG))
-        self._svg.setGeometry(self.lblIconPad.rect())
-        self.lblIconPad.setText("")
-
-        self._icon_anim = QPropertyAnimation(self._svg, b"windowOpacity")
-        self._icon_anim.setDuration(1800)
-        self._icon_anim.setStartValue(0.4)
-        self._icon_anim.setEndValue(1.0)
-        self._icon_anim.setEasingCurve(QEasingCurve.Type.SineCurve)
-        self._icon_anim.setLoopCount(-1)
-        self._icon_anim.start()
-
     # --- border smooth pulse ---
 
     _BORDER_COLORS = [

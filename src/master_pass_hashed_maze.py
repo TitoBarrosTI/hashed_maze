@@ -42,7 +42,7 @@ class MasterPass(QDialog,Ui_MainWindow):
         self.btnOk.clicked.connect(self.on_click_btn_ok)
         self.btnShowPWD.clicked.connect(self.show_pwd)
 
-        # icons works
+        # icons tasks
         self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
 
 
