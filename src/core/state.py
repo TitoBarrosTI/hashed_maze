@@ -6,6 +6,7 @@ class CryptoState:
         self.salt_hash: bytes | None = None
         self.derived_key: str | None = None
         self.decrypted_pass: str | None = None
+        self.credential_plaintext: str | None = None
 
 class UIState:
     def __init__(self):

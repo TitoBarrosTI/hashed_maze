@@ -12,6 +12,7 @@ from PySide6.QtCore import Qt, QTimer, QSettings, QEvent, QUrl
 from PySide6.QtGui import QDesktopServices, QPixmap, QIcon, QWindowStateChangeEvent
 from PySide6.QtUiTools import loadUiType
 from PySide6.QtWidgets import (
+    QApplication,
     QPushButton,
     QWidget,
     QMenu,
@@ -159,7 +160,6 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.btnCancel.clicked.connect(self.on_click_cancel)
         self.edtPWD.textChanged.connect(self.update_password_force)
         self.btnShowPWD.clicked.connect(self.show_pwd)
-        # self.btnSavePWD.clicked.connect(lambda: shake_widget(self, self.edtCurrentPWD))
         self.btnSavePWD.clicked.connect(self.change_master_password)
 
         # region ── icons and images works
@@ -386,6 +386,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
                         return
 
                     plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_)
+                    self.state.ui.credential_plaintext = plaintext
                     widget.setText(str(plaintext))
                 continue
             
@@ -583,9 +584,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 widget.setPlainText(value)
             else:
                 # if it's ciphertext only and has listed items
-                if key == 3 and not self.state.ui.current_id is None:
-                # (self.treeCredentialsResponse.topLevelItemCount() > 0):
-                    value = self.state.crypto.decrypted_pass
+                if key == 3 and self.state.ui.current_id is not None:
+                    value = self.state.ui.credential_plaintext or ""
                 widget.setText(value)
     
     def on_click_action(self, row_id: int, text: str, informative: str):
@@ -664,10 +664,14 @@ class MainWindow(BaseClass, Ui_MainWindow):
         
         # re-encrypt all credentials with new password
         rows = self.state.db.fetch_all("SELECT id, ciphertext, salt, nonce FROM credentials")
+        
+        self._log(f"Found {len(rows)} credentials to re-encrypt...")
         logging.debug(f"Starting re-encryption for {len(rows)} credentials")
-        for row in rows:
+        
+        for i, row in enumerate(rows,1):
+            self._log(f"Re-encrypting credential {i} of {len(rows)}...")
             data_ = {"ciphertext": row["ciphertext"], "salt": row["salt"], "nonce": row["nonce"]}
-            plaintext = CryptoVault.decrypt(self.state.crypto.derived_key, data_)
+            plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_)
             new_vault = CryptoVault.encrypt(new, plaintext)
 
             self.state.db.execute(
@@ -678,8 +682,10 @@ class MainWindow(BaseClass, Ui_MainWindow):
             logging.debug(f"Re-encrypting credential id={row['id']}")
 
         # region (obtainning updated data of crypto state)
+        self._log("Generating new session key...")
         session_salt = os.urandom(16)
         new_derived  = CryptoVault.derive_key(new, session_salt)
+        self._log("Updating master hash...")
         new_master_hash = CryptoVault.generate_hash_login(new)
 
         app_state.crypto.salt_hash      = base64.b64encode(session_salt) #.decode()
@@ -688,6 +694,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         app_state.crypto.decrypted_pass = new
         # endregion
 
+        self._log("Done. Master password changed successfully.")
         result = self.update_record('hash','')
         
         if result is not None:
@@ -701,3 +708,24 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.close()    
     # endregion
 
+    def _log(self, msg: str) -> None:
+        self.logMasterPWD.setReadOnly(True)
+        
+        # esmaece todas as linhas anteriores
+        cursor = self.logMasterPWD.textCursor()
+        self.logMasterPWD.selectAll()
+        
+        fmt = self.logMasterPWD.currentCharFormat()
+        fmt.setForeground(Qt.GlobalColor.darkGray)
+        self.logMasterPWD.mergeCurrentCharFormat(fmt)
+        
+        # move pro final e adiciona linha nova na cor normal
+        cursor.movePosition(cursor.MoveOperation.End)
+        self.logMasterPWD.setTextCursor(cursor)
+        
+        fmt.setForeground(Qt.GlobalColor.green)
+        self.logMasterPWD.setCurrentCharFormat(fmt)
+        self.logMasterPWD.append(msg)
+        
+        # força atualização visual imediata
+        QApplication.processEvents()
