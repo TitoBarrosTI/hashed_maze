@@ -141,6 +141,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
         self.btnManagerPWDCFG.enterEvent = lambda e: self._help_manage_password.show_near(self.btnManagerPWDCFG)
         self.btnManagerPWDCFG.leaveEvent = lambda e: self._help_manage_password.close()                        
+        
+        self.btnGenRandomPWD.clicked.connect(lambda e: self.edtPWD.setText(generate_random_password()))
         # endregion signal/slot connections
 
         # target fields for tree item data

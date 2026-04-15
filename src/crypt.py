@@ -1,3 +1,7 @@
+# MCacheBox
+# Copyright (c) 2026 Tito de Barros Junior
+# Licensed under the MIT License
+
 import logging
 import os
 import base64

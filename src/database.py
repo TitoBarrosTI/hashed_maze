@@ -1,3 +1,7 @@
+# MCacheBox
+# Copyright (c) 2026 Tito de Barros Junior
+# Licensed under the MIT License
+
 from contextlib import contextmanager
 import sqlite3
 from typing import Any, Generator

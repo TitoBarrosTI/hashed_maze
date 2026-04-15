@@ -1,3 +1,7 @@
+# MCacheBox
+# Copyright (c) 2026 Tito de Barros Junior
+# Licensed under the MIT License
+
 from src.database import SQLiteDB
 from src.config import db_path
 class CryptoState:
