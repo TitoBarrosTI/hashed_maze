@@ -1,4 +1,4 @@
-# MCacheBox
+# HashedMaze
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
@@ -46,11 +46,15 @@ class SQLiteDB:
             conn.executescript(ddl)
             conn.commit()
 
-    def execute(self, sql, params: tuple = ()) -> None:
-        with self._get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(sql, params)
-            conn.commit()
+    def execute(self, sql, params: tuple = ()) -> tuple[bool, str]:
+        try:
+            with self._get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(sql, params)
+                conn.commit()        
+            return True, "Done. Inserted successfully."
+        except Exception as e: 
+            return False, f"Fail: Execution failed: {e}"
     
     def insert(self, table, data: dict):
         columns = ", ".join(data.keys())
@@ -70,12 +74,12 @@ class SQLiteDB:
             conn.execute(sql, tuple(data.values()) + params)
             conn.commit()
 
-    def fetch_all(self, query, params: tuple = ()) -> list[dict] | None:
+    def fetch_all(self, query, params: tuple = ()) -> list[dict]:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(query, params)
             rows = cursor.fetchall()
-            return [dict(row) for row in rows] if rows else None
+            return [dict(row) for row in rows]
     
     def fetch_one(self, query, params: tuple[Any, ...] = ()) -> dict | None:
         with self._get_connection() as conn:
