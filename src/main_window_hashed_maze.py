@@ -33,7 +33,7 @@ from roundedframe import RoundedFrame
 from src.utils.resource_path import resource_path
 from src.utils.password_strength import calculate_force
 from src.utils.dialogs import confirm_dialog
-from src.core.state import app_state # AppState
+from src.core.state import app_state
 from ui.helpers.animations import shake_widget
 from src.popup_help import PopupHelp
 
@@ -97,6 +97,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
             lambda: self.search_credential(self.state.ui.search_field, self.edtSearch.text())
         )
 
+        # region ─ button tips
         self._help_search = PopupHelp(
             title="SEARCH",
             body="Use 'search by' to filter by a specific field\n"
@@ -143,6 +144,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.btnManagerPWDCFG.leaveEvent = lambda e: self._help_manage_password.close()                        
         
         self.btnGenRandomPWD.clicked.connect(lambda e: self.edtPWD.setText(generate_random_password()))
+        # endregion ─ button tips
+        
         # endregion signal/slot connections
 
         # target fields for tree item data
@@ -336,23 +339,24 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
         # generating encrypted password
         if self.state.crypto.derived_key is None:
-            return 
+            return False, "Derived_key is None"
         
-        vault = CryptoVault.encrypt(self.state.crypto.decrypted_pass, self.edtPWD.text())
-
-        payload = {
-            "user": self.edtAccount.text(),
-            "url": self.edtURL.text(),
-            "notes": self.edtPlainNotes.toPlainText(),
-            "ciphertext": vault["ciphertext"],
-            "salt": vault["salt"],
-            "nonce": vault["nonce"],
-        }
-
         try:
+            vault = CryptoVault.encrypt(self.state.crypto.decrypted_pass, self.edtPWD.text())
+
+            payload = {
+                "user": self.edtAccount.text(),
+                "url": self.edtURL.text(),
+                "notes": self.edtPlainNotes.toPlainText(),
+                "ciphertext": vault["ciphertext"],
+                "salt": vault["salt"],
+                "nonce": vault["nonce"],
+            }
+
+        # try:
             self.state.db.insert(table, payload)
         except Exception as e:
-            print(f"Error on insert: {e}")
+            return False, f"Error on insert :{e}"
 
         self.clear_fields(self.fields_to_clean())
         self.state.ui.editing_id = None  # flag edition
@@ -401,7 +405,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
             elif isinstance(widget, QListWidget):
                 widget.clear()
                 widget.addItems(str(value).splitlines())
-    # endregion
+    # endregion ── Crud methods ────────────────────────────
 
     # region ── Setup ─────────────────────────────────────
     def _setup_initial_screen(self):
@@ -410,7 +414,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
             self.login_or_hash = LoginWindow(self.state, parent=self)
         else:
             from src.master_pass_hashed_maze import MasterPass
-            self.login_or_hash = MasterPass(parent=self)
+            self.login_or_hash = MasterPass(app_state, parent=self)
         
         self.hide()
 
@@ -485,7 +489,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         try_key = CryptoVault.derive_key(typed_password, salt_bytes)
         db_hash_bytes = base64.b64decode(self.state.crypto.master_hash)
         return try_key == db_hash_bytes
-    # endregion
+    # endregion ────────────────────────────────
 
     # region ── Qt overrides ──────────────────────────────
     def eventFilter(self, watched, event):
@@ -550,7 +554,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.btnApply.setEnabled(True)
         self.btnCancel.setEnabled(True)
         self.handle_action_msg(lambda msg_input: (True, msg_input), "edit mode")
-    # endregion
+    # endregion ── Form state ────────────────────────────────
 
     # region ── Slot button ──────────────────────────────
     def on_click_new(self):
@@ -625,20 +629,22 @@ class MainWindow(BaseClass, Ui_MainWindow):
     def change_master_password(self):
         self.lblMsgPWD.clear()
         
-        # verifying current master password
+        # getting/verifying current/new master password
         typed = self.edtCurrentPWD.text().strip()
         current = app_state.crypto.decrypted_pass
         
         if not typed:
             self.edtCurrentPWD.setFocus()
-            self.lblMsgPWD.setText('Current password is empty')
+            self.lblMsgPWD.setText('Current memory master password is empty')
             shake_widget(self, self.edtCurrentPWD)
+            self._log("Interrupted: current memory master password cannot be empty", Qt.GlobalColor.darkYellow)
             return
 
         if not current == typed:
             self.edtCurrentPWD.setFocus()
             self.lblMsgPWD.setText(f'typed password {typed} is not correct')
             shake_widget(self, self.edtCurrentPWD)
+            self._log(f"Interrupted: typed password {typed} is not correct", Qt.GlobalColor.darkYellow)
             return
         
         # verifying new master password and confirmation
@@ -649,6 +655,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
             self.lblMsgPWD.setText(f'new password {new} and confirm {confirm} is not equals')
             shake_widget(self, self.edtNewPWD)
             shake_widget(self, self.edtNewPWDConfirm)
+            self._log(f'Interrupted: new password {new} and confirm {confirm} is not equals', Qt.GlobalColor.darkYellow)
             return
 
         fields = {
@@ -662,6 +669,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 field.setFocus()
                 self.lblMsgPWD.setText(f'field {name} is empty')
                 shake_widget(self, field)
+                self._log(f"Interrupted: field {name} cannot be empty", Qt.GlobalColor.darkYellow)
                 break
         
         # re-encrypt all credentials with new password
@@ -670,35 +678,43 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self._log(f"Found {len(rows)} credentials to re-encrypt...")
         logging.debug(f"Starting re-encryption for {len(rows)} credentials")
         
-        for i, row in enumerate(rows,1):
-            self._log(f"Re-encrypting credential {i} of {len(rows)}...")
-            data_ = {"ciphertext": row["ciphertext"], "salt": row["salt"], "nonce": row["nonce"]}
-            plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_)
-            new_vault = CryptoVault.encrypt(new, plaintext)
+        try:
+            for i, row in enumerate(rows,1):
+                self._log(f"Re-encrypting credential {i} of {len(rows)}...")
+                data_ = {"ciphertext": row["ciphertext"], "salt": row["salt"], "nonce": row["nonce"]}
+                plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_)
+                new_vault = CryptoVault.encrypt(new, plaintext)
 
-            self.state.db.execute(
-                "UPDATE credentials SET ciphertext=?, salt=?, nonce=? WHERE id=?",
-                (new_vault["ciphertext"], new_vault["salt"], new_vault["nonce"], row["id"])
-            )
+                self.state.db.execute(
+                    "UPDATE credentials SET ciphertext=?, salt=?, nonce=? WHERE id=?",
+                    (new_vault["ciphertext"], new_vault["salt"], new_vault["nonce"], row["id"])
+                )
 
-            logging.debug(f"Re-encrypting credential id={row['id']}")
-
-        # region (obtainning updated data of crypto state)
-        self._log("Generating new session key...")
-        session_salt = os.urandom(16)
-        new_derived  = CryptoVault.derive_key(new, session_salt)
-        self._log("Updating master hash...")
-        new_master_hash = CryptoVault.generate_hash_login(new)
-
-        app_state.crypto.salt_hash      = base64.b64encode(session_salt) #.decode()
-        app_state.crypto.derived_key    = base64.b64encode(new_derived).decode()
-        app_state.crypto.master_hash    = new_master_hash[0]
-        app_state.crypto.decrypted_pass = new
-        # endregion
-
-        self._log("Done. Master password changed successfully.")
-        result = self.update_record('hash','')
+                logging.debug(f"Re-encrypting credential id={row['id']}")
         
+            self._log("Generating new session key...")            
+            hash_bytes, salt_bytes, hash_b64, salt_b64 = CryptoVault.generate_hash_login(new)
+            
+            # region (setting updated data to crypto state)
+            app_state.crypto.salt_hash = salt_bytes
+            app_state.crypto.master_hash = hash_b64
+            app_state.crypto.decrypted_pass = new
+            # endregion
+            
+            self._log("Updating master hash...")
+            result = self.update_record('hash','')
+
+            match result:
+                case (True, message):
+                    self._log(f"Done. Master password changed successfully.")
+                case (False, message):
+                    self._log(f"Update failed: {message}")
+                case None:
+                    self._log("No record updated.")
+        except Exception as e:
+            self._log(f"Interrupted: unexpected error — {e}", Qt.GlobalColor.darkYellow)
+            return
+
         if result is not None:
             ok, msg = result
             if ok:
@@ -708,9 +724,10 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
     def on_close_clicked(self) -> None:
         self.close()    
-    # endregion
+    # endregion ── Slot button ──────────────────────────────
 
-    def _log(self, msg: str) -> None:
+    def _log(self, msg: str, color: Qt.GlobalColor = Qt.GlobalColor.green) -> None:
+        # self.logMasterPWD.clear()
         self.logMasterPWD.setReadOnly(True)
         
         # esmaece todas as linhas anteriores
@@ -725,7 +742,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
         cursor.movePosition(cursor.MoveOperation.End)
         self.logMasterPWD.setTextCursor(cursor)
         
-        fmt.setForeground(Qt.GlobalColor.green)
+        fmt.setForeground(color)
+        # fmt.setForeground(Qt.GlobalColor.green)
         self.logMasterPWD.setCurrentCharFormat(fmt)
         self.logMasterPWD.append(msg)
         
