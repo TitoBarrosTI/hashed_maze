@@ -1,4 +1,4 @@
-# MCacheBox
+# HashedMaze
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
@@ -111,7 +111,9 @@ class LoginWindow(BaseClass,Ui_MainWindow):
         if try_key == db_hash_bytes:
             self.app_state.crypto.master_hash = master.hash
             self.app_state.crypto.salt = master.salt
-            self.app_state.crypto.derived_key = typed_password
+            self.app_state.crypto.decrypted_pass = typed_password
+            self.app_state.crypto.derived_key = try_key
+            # self.app_state.crypto.derived_key = typed_password
             return True
         
         return False

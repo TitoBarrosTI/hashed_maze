@@ -1,6 +1,8 @@
-# MCacheBox
+# HashedMaze
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
+
+import logging
 
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QPushButton, QWidget, QDialog, QApplication, QVBoxLayout,
@@ -9,6 +11,7 @@ from PySide6.QtUiTools import loadUiType
 from zxcvbn import zxcvbn
 from PySide6.QtCore import QTimer, Qt
 
+from src.core.state import app_state
 from src.main_window_hashed_maze import MainWindow
 from src.crypt import CryptoVault
 from src.config import db_path
@@ -19,10 +22,11 @@ from src.utils.resource_path import resource_path
 Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/master_pass_hashed_maze.ui"))  # type: ignore
 
 class MasterPass(QDialog,Ui_MainWindow):
-    def __init__(self, parent=MainWindow):
+    def __init__(self, app_state, parent=MainWindow):
         super().__init__(parent)
         self.setupUi(self)
         self.setFixedSize(self.size())
+        self.state = app_state
 
         self.lblCFGDatabaseDirectory.setText(db_path)
         self.lblInstructions.setTextFormat(Qt.TextFormat.RichText)
@@ -53,6 +57,8 @@ class MasterPass(QDialog,Ui_MainWindow):
         )
 
     def insert_master_pass(self):
+        master_password = self.edtMasterPass.text()
+
         if not self.edtMasterPass.text():
             self.marquee = MarqueeController(
                 self.lblMsg,
@@ -61,29 +67,52 @@ class MasterPass(QDialog,Ui_MainWindow):
             )
             return
 
-        ret_hash = CryptoVault.generate_hash_login(self.edtMasterPass.text())
+        hash_login, salt_bytes, hash_b64, salt_b64 = CryptoVault.generate_hash_login(master_password)
+
+        # setting updated data to crypto state
+        self.state.crypto.decrypted_pass = master_password
+        self.state.crypto.master_hash = hash_b64
+        self.state.crypto.salt_hash = salt_bytes
+        self.state.crypto.derived_key = hash_login.hex()
 
         data = {
-            "mkhash": ret_hash[0],
-            "salt": ret_hash[1]
+            "mkhash": hash_b64,
+            "salt": salt_b64
         }
 
         try:
             db = SQLiteDB(db_path)
-            # with SQLiteDB(db_path) as cnx:
             cols = ", ".join(data.keys())
             placeholders = ", ".join(["?"] * len(data))
             sql = f"INSERT INTO hash ({cols}) VALUES({placeholders})"
 
+            success, msg = db.execute(sql, (data['mkhash'], data['salt']))
+
+            if not success:
+                self.marquee = MarqueeController(
+                    self.lblMsg,
+                    "not registered master hash",
+                    interval=100
+                )
+
+                logging.error(msg)
+                return
+            
             self.marquee = MarqueeController(
                 self.lblMsg,
-                # self.edtMasterPass,
                 "registered master hash",
                 interval=100
             )
 
-            db.execute(sql, ret_hash)
+            from src.login_window_hashed_maze import LoginWindow
+            self.login = LoginWindow(self.state, parent=self)
+            
+            if self.login.exec():
+                self.accept()
+            else:
+                self.reject()            
         except Exception as e:
+            logging.debug(f"error on insert master pass: {e}")
             print(f'error on insert master pass: {e}')
 
     def on_click_btn_ok(self) -> None:
