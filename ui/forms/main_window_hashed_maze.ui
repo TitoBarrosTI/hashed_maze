@@ -773,8 +773,8 @@ background-color:rgb(55, 55, 55)
              <rect>
               <x>20</x>
               <y>160</y>
-              <width>371</width>
-              <height>51</height>
+              <width>431</width>
+              <height>81</height>
              </rect>
             </property>
             <property name="frameShape">
