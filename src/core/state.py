@@ -1,4 +1,4 @@
-# MCacheBox
+# HashedMaze
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
@@ -20,9 +20,6 @@ class UIState:
         self.initial_row_items: dict = {}
 
 class AppState:
-    # from src.database import SQLiteDB
-    # from src.config import db_path
-
     def __init__(self, db_path):
         # self.db = self.SQLiteDB(db_path)
         self.db = SQLiteDB(db_path)

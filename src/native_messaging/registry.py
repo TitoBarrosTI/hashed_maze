@@ -1,3 +1,6 @@
+# HashedMaze
+# Copyright (c) 2026 Tito de Barros Junior
+# Licensed under the MIT License
 import winreg
 from src.utils.resource_path import resource_path
 

@@ -1,3 +1,7 @@
+# HashedMaze
+# Copyright (c) 2026 Tito de Barros Junior
+# Licensed under the MIT License
+
 import os
 from src.database import SQLiteDB
 

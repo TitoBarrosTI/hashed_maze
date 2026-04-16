@@ -2,6 +2,7 @@
 # Copyright (C) 2026 Tito de Barros Junior
 # Lincensed under the MIT License
 
+
 import signal
 import sys
 
@@ -14,6 +15,7 @@ from src.utils.dialogs import info_dialog
 from src.core.state import app_state
 
 app = QApplication([])
+
 
 if is_already_running():
     info_dialog("System already in operation. New instances are not allowed!",

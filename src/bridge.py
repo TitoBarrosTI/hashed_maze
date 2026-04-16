@@ -1,3 +1,7 @@
+# HashedMaze
+# Copyright (c) 2026 Tito de Barros Junior
+# Licensed under the MIT License
+
 import sys
 import json
 import struct
@@ -130,6 +134,7 @@ def get_master_password():
         response = client.recv(4096).decode().strip()
         client.close()
 
+        logging.debug(f"DEBUG response do servidor: {repr(response)}")
         if response.startswith("ERROR"):
             logging.error(response)
             return None

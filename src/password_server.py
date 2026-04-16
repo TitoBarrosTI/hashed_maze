@@ -1,9 +1,9 @@
-# MCacheBox
+# HashedMaze
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
 import socket
-from src.core.state import app_state   # usa o objeto global
+from src.core.state import app_state # uses the global object
 
 def run_server(host="127.0.0.1", port=5001):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

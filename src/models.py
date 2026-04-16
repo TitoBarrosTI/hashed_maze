@@ -1,5 +1,8 @@
-from dataclasses import dataclass, asdict
+# HashedMaze
+# Copyright (c) 2026 Tito de Barros Junior
+# Licensed under the MIT License
 
+from dataclasses import dataclass, asdict
 @dataclass(frozen=True)
 class MasterKey:
     hash: str
