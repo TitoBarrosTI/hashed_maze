@@ -1,4 +1,4 @@
-# MCacheBox
+# HashedMaze
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
@@ -56,12 +56,22 @@ class CryptoVault:
         aes = AESGCM(key)
         return aes.decrypt(nonce, ciphertext, None).decode()   
 
+    # @staticmethod
+    # def generate_hash_login(master_password:str) -> tuple:
+    #     salt = os.urandom(16)
+    #     # your derive_key to generate the hash
+    #     hash_login = CryptoVault.derive_key(master_password, salt)
+    #     return base64.b64encode(hash_login).decode(), base64.b64encode(salt).decode()
+    
     @staticmethod
-    def generate_hash_login(master_password:str) -> tuple:
+    def generate_hash_login(master_password: str) -> tuple[bytes, bytes, str, str]:
         salt = os.urandom(16)
-        # your derive_key to generate the hash
         hash_login = CryptoVault.derive_key(master_password, salt)
-        return base64.b64encode(hash_login).decode(), base64.b64encode(salt).decode()
+
+        hash_b64 = base64.b64encode(hash_login).decode()
+        salt_b64 = base64.b64encode(salt).decode()
+
+        return hash_login, salt, hash_b64, salt_b64
 
     @staticmethod
     def has_master_hash() -> bool | None:
