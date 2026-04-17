@@ -1,6 +1,7 @@
 # 🔐 Hashed Maze
 ### A local password manager built with Python and PySide6
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/titobarrosti)
 ![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![PySide6](https://img.shields.io/badge/PySide6-6.10-41CD52?style=for-the-badge&logo=qt&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
@@ -93,10 +94,10 @@ hashed_maze/
 │   └── setup.py  # Native Messaging host registration
 ├── static/
 │   └── icons/
-│       ├── about_50.png
+│       ├── about_40_green.png
 │       ├── apply_20.png
-│       ├── search_50.png
-│       ├── settings_50.png
+│       ├── database_search_40_green.png
+│       ├── settings_40_green.png
 │       ├── visibility_20.png
 │       └── visibility_off_20.png
 ├── ui/
