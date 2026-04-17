@@ -180,6 +180,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         # endregion ── icons/images tasks
 
         self.btnLnkReportABug.clicked.connect(self.open_bug_report)
+        self.btnLnkBuymeCoffee.clicked.connect(self.open_buy_me_a_coffee)
         self.btnClose.clicked.connect(self.on_close_clicked)
 
         # components config
@@ -626,6 +627,11 @@ class MainWindow(BaseClass, Ui_MainWindow):
         QDesktopServices.openUrl(
             QUrl("https://github.com/TitoBarrosTI/hashed_maze/issues/new")
         )
+
+    def open_buy_me_a_coffee(self) -> None:
+        QDesktopServices.openUrl(
+            QUrl("https://ko-fi.com/titobarrosti")
+        )        
     
     def change_master_password(self):
         self.lblMsgPWD.clear()

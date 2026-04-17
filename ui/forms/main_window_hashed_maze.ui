@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_search">
        <property name="styleSheet">
@@ -829,8 +829,8 @@ background-color:rgb(55, 55, 55)
             <rect>
              <x>50</x>
              <y>468</y>
-             <width>131</width>
-             <height>41</height>
+             <width>140</width>
+             <height>40</height>
             </rect>
            </property>
            <property name="text">
@@ -951,12 +951,12 @@ color:rgb(130, 130, 130)
             <rect>
              <x>100</x>
              <y>343</y>
-             <width>141</width>
+             <width>161</width>
              <height>16</height>
             </rect>
            </property>
            <property name="text">
-            <string>&lt;span&gt;titobarrosjr@hotmail.com&lt;/span&gt;</string>
+            <string>&lt;span&gt;titobarrosjr@protonmail.com&lt;/span&gt;</string>
            </property>
            <property name="openExternalLinks">
             <bool>false</bool>
@@ -1046,6 +1046,25 @@ background-color: rgba(0, 255, 0, 10); /* Um fundo bem clarinho só pra marcar a
            </property>
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignCenter</set>
+           </property>
+          </widget>
+          <widget class="QCommandLinkButton" name="btnLnkBuymeCoffee">
+           <property name="geometry">
+            <rect>
+             <x>50</x>
+             <y>424</y>
+             <width>140</width>
+             <height>40</height>
+            </rect>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">#btnLnkBuymeCoffee {
+	background-color:rgb(255, 216, 119);
+	color:black;
+}</string>
+           </property>
+           <property name="text">
+            <string>buy me a coffee :)</string>
            </property>
           </widget>
          </widget>
