@@ -50,7 +50,10 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.pBar.setTextVisible(False)
         self.lblCFGDatabaseDirectory.setText(db_path)
         self.lblVersion.setText(APP_VERSION)
-        
+
+        # hiding the column password
+        self.treeCredentialsResponse.setColumnHidden(3, True)
+
         # decides which screen will be opened
         self._setup_initial_screen()
 
@@ -209,10 +212,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
             self.treeCredentialsResponse.clear()
 
             if not rows:
+                self.lblResults.setText("-- no results --")
                 return
-
-            # hiding the column password
-            self.treeCredentialsResponse.setColumnHidden(3, True)
 
             self.lblResults.setText(f"results: {str(rows[0]["total"])}")
             
@@ -427,11 +428,11 @@ class MainWindow(BaseClass, Ui_MainWindow):
     # region ── UI helpers ────────────────────────────────
     def update_icon(self, index) -> None:
         if index == 0:
-            self.lblIconSearch.setPixmap(QPixmap("static/icons/search_50.png"))
+            self.lblIconSearch.setPixmap(QPixmap("static/icons/database_search_40_clear_green"))            
         if index == 1:
-            self.lblIconConfig.setPixmap(QPixmap("static/icons/settings_50.png"))
+            self.lblIconConfig.setPixmap(QPixmap("static/icons/settings_40_green.png"))
         if index == 2:
-            self.lblIconAbout.setPixmap(QPixmap("static/icons/about_50.png"))    
+            self.lblIconAbout.setPixmap(QPixmap("static/icons/about_40_green.png"))
     
     def update_password_force(self, pass_: str):
         forca = calculate_force(pass_)  # retorn 0-100
