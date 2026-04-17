@@ -124,6 +124,9 @@
              <height>41</height>
             </rect>
            </property>
+           <property name="toolTip">
+            <string/>
+           </property>
            <property name="text">
             <string>ICON</string>
            </property>
@@ -423,10 +426,10 @@ background-color:rgb(55, 55, 55)
           <widget class="QLabel" name="lblResults">
            <property name="geometry">
             <rect>
-             <x>764</x>
-             <y>57</y>
-             <width>50</width>
-             <height>10</height>
+             <x>723</x>
+             <y>51</y>
+             <width>91</width>
+             <height>18</height>
             </rect>
            </property>
            <property name="layoutDirection">
@@ -439,6 +442,9 @@ background-color:rgb(55, 55, 55)
            </property>
            <property name="text">
             <string>...</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
            </property>
           </widget>
           <widget class="QPushButton" name="btnHelpSearch">
@@ -480,10 +486,10 @@ background-color:rgb(55, 55, 55)
           <widget class="QLabel" name="lblIconConfig">
            <property name="geometry">
             <rect>
-             <x>750</x>
-             <y>0</y>
-             <width>60</width>
-             <height>61</height>
+             <x>780</x>
+             <y>10</y>
+             <width>45</width>
+             <height>41</height>
             </rect>
            </property>
            <property name="text">
@@ -496,7 +502,7 @@ background-color:rgb(55, 55, 55)
              <x>20</x>
              <y>20</y>
              <width>611</width>
-             <height>171</height>
+             <height>191</height>
             </rect>
            </property>
            <property name="title">
@@ -576,7 +582,7 @@ background-color:rgb(55, 55, 55)
              </rect>
             </property>
             <property name="maxVisibleItems">
-             <number>0</number>
+             <number>5</number>
             </property>
             <item>
              <property name="text">
@@ -662,9 +668,9 @@ background-color:rgb(55, 55, 55)
            <property name="geometry">
             <rect>
              <x>20</x>
-             <y>200</y>
+             <y>220</y>
              <width>611</width>
-             <height>271</height>
+             <height>253</height>
             </rect>
            </property>
            <property name="title">
@@ -674,7 +680,7 @@ background-color:rgb(55, 55, 55)
             <property name="geometry">
              <rect>
               <x>20</x>
-              <y>40</y>
+              <y>38</y>
               <width>241</width>
               <height>21</height>
              </rect>
@@ -690,7 +696,7 @@ background-color:rgb(55, 55, 55)
             <property name="geometry">
              <rect>
               <x>20</x>
-              <y>72</y>
+              <y>70</y>
               <width>241</width>
               <height>21</height>
              </rect>
@@ -719,7 +725,7 @@ background-color:rgb(55, 55, 55)
             <property name="geometry">
              <rect>
               <x>20</x>
-              <y>102</y>
+              <y>100</y>
               <width>241</width>
               <height>21</height>
              </rect>
@@ -754,7 +760,7 @@ background-color:rgb(55, 55, 55)
             <property name="geometry">
              <rect>
               <x>20</x>
-              <y>134</y>
+              <y>130</y>
               <width>431</width>
               <height>101</height>
              </rect>
@@ -808,10 +814,10 @@ background-color:rgb(55, 55, 55)
           <widget class="QLabel" name="lblIconAbout">
            <property name="geometry">
             <rect>
-             <x>750</x>
-             <y>0</y>
-             <width>60</width>
-             <height>61</height>
+             <x>780</x>
+             <y>10</y>
+             <width>45</width>
+             <height>41</height>
             </rect>
            </property>
            <property name="text">
@@ -863,11 +869,11 @@ Email:
              <x>60</x>
              <y>171</y>
              <width>621</width>
-             <height>50</height>
+             <height>70</height>
             </rect>
            </property>
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A secure vault for organizing passwords, notes, and sensitive information with quick access and reliable protection.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A secure vault for organizing passwords, notes, and sensitive information with quick access and reliable protection.&lt;/p&gt;&lt;p&gt;Encryption powered by AES-256-GCM with unique nonces per entry, keys derived via PBKDF2-HMAC-SHA256, and master password hashed with bcrypt.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
