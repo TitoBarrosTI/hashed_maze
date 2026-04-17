@@ -17,6 +17,7 @@ from src.core.state import app_state
 app = QApplication([])
 
 
+
 if is_already_running():
     info_dialog("System already in operation. New instances are not allowed!",
                 "This instance will be terminated.")

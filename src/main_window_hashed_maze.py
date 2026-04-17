@@ -286,11 +286,11 @@ class MainWindow(BaseClass, Ui_MainWindow):
             if not self.edtNewPWDConfirm.text():
                 return (False, "Fill in the required field")
             
-            ret_hash = CryptoVault.generate_hash_login(self.edtNewPWDConfirm.text())
+            ash_login, salt, hash_b64, salt_b64 = CryptoVault.generate_hash_login(self.edtNewPWDConfirm.text())
 
             data = {
-                "mkhash": ret_hash[0],
-                "salt": ret_hash[1]
+                "mkhash": hash_b64,
+                "salt": salt_b64
             }
 
         try:
@@ -635,14 +635,12 @@ class MainWindow(BaseClass, Ui_MainWindow):
         
         if not typed:
             self.edtCurrentPWD.setFocus()
-            self.lblMsgPWD.setText('Current memory master password is empty')
             shake_widget(self, self.edtCurrentPWD)
             self._log("Interrupted: current memory master password cannot be empty", Qt.GlobalColor.darkYellow)
             return
 
         if not current == typed:
             self.edtCurrentPWD.setFocus()
-            self.lblMsgPWD.setText(f'typed password {typed} is not correct')
             shake_widget(self, self.edtCurrentPWD)
             self._log(f"Interrupted: typed password {typed} is not correct", Qt.GlobalColor.darkYellow)
             return
@@ -652,7 +650,6 @@ class MainWindow(BaseClass, Ui_MainWindow):
         confirm = self.edtNewPWDConfirm.text().strip()
 
         if not new == confirm:
-            self.lblMsgPWD.setText(f'new password {new} and confirm {confirm} is not equals')
             shake_widget(self, self.edtNewPWD)
             shake_widget(self, self.edtNewPWDConfirm)
             self._log(f'Interrupted: new password {new} and confirm {confirm} is not equals', Qt.GlobalColor.darkYellow)
@@ -667,7 +664,6 @@ class MainWindow(BaseClass, Ui_MainWindow):
         for name, field in fields.items():
             if not field.text().strip():
                 field.setFocus()
-                self.lblMsgPWD.setText(f'field {name} is empty')
                 shake_widget(self, field)
                 self._log(f"Interrupted: field {name} cannot be empty", Qt.GlobalColor.darkYellow)
                 break
@@ -712,15 +708,15 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 case None:
                     self._log("No record updated.")
         except Exception as e:
-            self._log(f"Interrupted: unexpected error — {e}", Qt.GlobalColor.darkYellow)
+            self._log(f"Interrupted: credential error - {row['id']} ({row['url']}): {e}", color=Qt.GlobalColor.red)
             return
 
         if result is not None:
             ok, msg = result
             if ok:
-                self.lblMsgPWD.setText('Master password changed with success')
+                self._log("Master password changed with success", color=Qt.GlobalColor.green)
             else:
-                self.lblMsgPWD.setText(f'error on process: {msg}')
+                self._log(f"f'error on process: {msg}", color=Qt.GlobalColor.red)
 
     def on_close_clicked(self) -> None:
         self.close()    

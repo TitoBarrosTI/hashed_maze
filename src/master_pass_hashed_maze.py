@@ -110,7 +110,7 @@ class MasterPass(QDialog,Ui_MainWindow):
             if self.login.exec():
                 self.accept()
             else:
-                self.reject()            
+                self.reject()
         except Exception as e:
             logging.debug(f"error on insert master pass: {e}")
             print(f'error on insert master pass: {e}')
