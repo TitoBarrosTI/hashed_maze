@@ -271,9 +271,6 @@ class MainWindow(BaseClass, Ui_MainWindow):
             if not self._required_fields_ok():
                 return (False, "Fill in the required field")
 
-            if self.state.crypto.derived_key is None:
-                return
-            
             vault = CryptoVault.encrypt(self.state.crypto.decrypted_pass, self.edtPWD.text())
 
             data = {
@@ -304,7 +301,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 cols = ", ".join([f"{key} = ?" for key in data.keys()])
                 sql = f"UPDATE {table} SET {cols} WHERE {where} = ?"
                 values = list(data.values())
-                values.append(self.state.ui.current_id)
+                values.append(self.state.ui.editing_id)
 
             self.state.db.execute(sql, tuple(values))
 
@@ -312,7 +309,6 @@ class MainWindow(BaseClass, Ui_MainWindow):
         except Exception as e:
             print(f"Error on update: {e}")
 
-        self.state.ui.editing_id = None  # flag edition
         self.btnApply.setEnabled(False)
         self.btnCancel.setEnabled(False)
         self.on_action_finished()
@@ -355,13 +351,12 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 "nonce": vault["nonce"],
             }
 
-        # try:
-            self.state.db.insert(table, payload)
+            new_id = self.state.db.insert(table, payload)
         except Exception as e:
             return False, f"Error on insert :{e}"
 
         self.clear_fields(self.fields_to_clean())
-        self.state.ui.editing_id = None  # flag edition
+        self.state.ui.editing_id = new_id
         self.btnApply.setEnabled(False)
         self.btnCancel.setEnabled(False)
         self.on_action_finished()
@@ -371,8 +366,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
     def load_data_row(self, mapping: dict, item, _) -> None:
         # visual feedback
         self.visual_feedback_on_record_status(1)
-        self.state.ui.current_id = item.data(0, Qt.ItemDataRole.UserRole)
-        self.state.ui.editing_id = self.state.ui.current_id # flag edition
+        self.state.ui.editing_id = item.data(0, Qt.ItemDataRole.UserRole) # flag edition
         data_items = item.data(1, Qt.ItemDataRole.UserRole)
 
         # Saving initial data received from treecredentials for rollback if editing is cancelled
@@ -560,7 +554,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
     # region ── Slot button ──────────────────────────────
     def on_click_new(self):
-        self.state.ui.editing_id = None  # flag edition
+        self.state.ui.editing_id = None  # flag edition (Single point of assignment to None)
         self.clear_fields(self.fields_to_clean())
         self.edtAccount.setFocus()
         # O lambda recebe o texto (*args) e o devolve na tupla de retorno
@@ -592,7 +586,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 widget.setPlainText(value)
             else:
                 # if it's ciphertext only and has listed items
-                if key == 3 and self.state.ui.current_id is not None:
+                if key == 3 and self.state.ui.editing_id is not None:
                     value = self.state.ui.credential_plaintext or ""
                 widget.setText(value)
     

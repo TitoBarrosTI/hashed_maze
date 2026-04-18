@@ -63,8 +63,9 @@ class SQLiteDB:
         sql = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
 
         with self._get_connection() as conn:
-            conn.execute(sql, tuple(data.values()))
+            cursor = conn.execute(sql, tuple(data.values()))
             conn.commit()
+            return cursor.lastrowid
 
     def update(self, table, data: dict, where: str, params: tuple):
         with self._get_connection() as conn:

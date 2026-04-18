@@ -15,7 +15,6 @@ class CryptoState:
 class UIState:
     def __init__(self):
         self.search_field: str | None = None
-        self.current_id: int | None = None
         self.editing_id: int | None = None
         self.initial_row_items: dict = {}
 
