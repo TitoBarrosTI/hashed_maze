@@ -628,8 +628,6 @@ class MainWindow(BaseClass, Ui_MainWindow):
         )        
     
     def change_master_password(self):
-        self.lblMsgPWD.clear()
-        
         # getting/verifying current/new master password
         typed = self.edtCurrentPWD.text().strip()
         current = app_state.crypto.decrypted_pass
@@ -670,54 +668,50 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 break
         
         # re-encrypt all credentials with new password
-        rows = self.state.db.fetch_all("SELECT id, ciphertext, salt, nonce FROM credentials")
-        
+        rows = self.state.db.fetch_all("SELECT id, ciphertext, salt, nonce, url FROM credentials")
         self._log(f"Found {len(rows)} credentials to re-encrypt...")
         logging.debug(f"Starting re-encryption for {len(rows)} credentials")
         
+        row = None
         try:
+            updates = []
+
             for i, row in enumerate(rows,1):
                 self._log(f"Re-encrypting credential {i} of {len(rows)}...")
                 data_ = {"ciphertext": row["ciphertext"], "salt": row["salt"], "nonce": row["nonce"]}
                 plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_)
                 new_vault = CryptoVault.encrypt(new, plaintext)
+                updates.append((new_vault["ciphertext"], new_vault["salt"], new_vault["nonce"], row["id"]))
+                logging.debug(f"Re-encrypted credential id={row['id']}")
 
-                self.state.db.execute(
-                    "UPDATE credentials SET ciphertext=?, salt=?, nonce=? WHERE id=?",
-                    (new_vault["ciphertext"], new_vault["salt"], new_vault["nonce"], row["id"])
-                )
-
-                logging.debug(f"Re-encrypting credential id={row['id']}")
-        
-            self._log("Generating new session key...")            
+            # new session
+            self._log("Generating new session key...")
             hash_bytes, salt_bytes, hash_b64, salt_b64 = CryptoVault.generate_hash_login(new)
-            
-            # region (setting updated data to crypto state)
+
+            # all atomic commiting
+            with self.state.db.transaction() as conn:
+                for upd in updates:
+                    conn.execute("UPDATE credentials SET ciphertext=?, salt=?, nonce=? WHERE id=?", upd)
+                self._log("Updating master hash...")
+                conn.execute("UPDATE hash SET mkhash=?, salt=?", (hash_b64, salt_b64))
+
+            self._log("Done. Master password changed successfully.", color=Qt.GlobalColor.green)
+
+            # region (updating data to crypto state)
             app_state.crypto.salt_hash = salt_bytes
             app_state.crypto.master_hash = hash_b64
             app_state.crypto.decrypted_pass = new
             # endregion
-            
-            self._log("Updating master hash...")
-            result = self.update_record('hash','')
-
-            match result:
-                case (True, message):
-                    self._log(f"Done. Master password changed successfully.")
-                case (False, message):
-                    self._log(f"Update failed: {message}")
-                case None:
-                    self._log("No record updated.")
         except Exception as e:
-            self._log(f"Interrupted: credential error - {row['id']} ({row['url']}): {e}", color=Qt.GlobalColor.red)
-            return
-
-        if result is not None:
-            ok, msg = result
-            if ok:
-                self._log("Master password changed with success", color=Qt.GlobalColor.green)
+            if row:
+                self._log(
+                    f"Interrupted: {type(e).__name__} - id={row['id']} url={row['url']} "
+                    f"| nonce={row['nonce'][:8]}... salt={row['salt'][:8]}...",
+                    color=Qt.GlobalColor.red
+            )
             else:
-                self._log(f"f'error on process: {msg}", color=Qt.GlobalColor.red)
+                self._log(f"Interrupted: {type(e).__name__}: {e!r}", color=Qt.GlobalColor.red)
+            return
 
     def on_close_clicked(self) -> None:
         self.close()    

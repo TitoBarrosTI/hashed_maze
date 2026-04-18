@@ -23,6 +23,16 @@ class SQLiteDB:
         finally:
             conn.close()
 
+    @contextmanager 
+    def transaction(self) -> Generator[sqlite3.Connection, None, None]:
+        with self._get_connection() as conn:
+            try:
+                yield conn
+                conn.commit()
+            except Exception:
+                conn.rollback()
+                raise
+
     def initialize(self) -> None:
         ddl = """
             CREATE TABLE IF NOT EXISTS credentials (
