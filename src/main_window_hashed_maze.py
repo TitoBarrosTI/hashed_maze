@@ -557,6 +557,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
     # region ── Slot button ──────────────────────────────
     def on_click_new(self):
+        # Store the value for rollback on cancel.
+        self.state.ui.editing_id_before_cancel = self.state.ui.editing_id
         self.state.ui.editing_id = None  # flag edition (Single point of assignment to None)
         self.clear_fields(self.fields_to_clean())
         self.edtAccount.setFocus()
@@ -567,6 +569,9 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.visual_feedback_on_record_status(1)
     
     def on_click_cancel(self):
+        # restoring value of id
+        self.state.ui.editing_id = self.state.ui.editing_id_before_cancel
+
         self.visual_feedback_on_record_status()
         self.handle_action_msg(lambda msg_input: (False, msg_input), "view mode")
         self.btnApply.setEnabled(False)
