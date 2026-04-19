@@ -390,6 +390,9 @@ class MainWindow(BaseClass, Ui_MainWindow):
                     plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_)
                     self.state.ui.credential_plaintext = plaintext
                     widget.setText(str(plaintext))
+
+                    # overwrite with plaintext
+                    self.state.ui.initial_row_items["ciphertext"] = str(plaintext)
                 continue
             
             value = item.text(col_index)
