@@ -74,12 +74,12 @@ class MainWindow(BaseClass, Ui_MainWindow):
         header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
 
         # signal/slot connections
-        # region ─ sitting editing status check ───────────────
+        # sitting editing status check ───────────────
         fields_in_form = [self.edtAccount, self.edtURL, self.edtPWD, self.edtPlainNotes]
         for f in fields_in_form:
             f.textChanged.connect(self.on_edit_fields)
 
-        # Defining and creating actions in the search menu
+        # region ── defining and creating actions in the search menu
         self.search_actions = {}
         menuSearch = QMenu(self)
 
@@ -93,12 +93,16 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.btnSearchBy.setMenu(menuSearch)
         self.btnSearchBy.setPopupMode(QToolButton.InstantPopup)
         self.btnSearch.clicked.connect(
-            lambda: self.search_credential(self.state.ui.search_field, self.edtSearch.text())
+            lambda: self.search_credential(self.state.ui.search_field, self.edtSearch.text(),self.state.ui.search_order)
         )
 
         self.edtSearch.returnPressed.connect(
-            lambda: self.search_credential(self.state.ui.search_field, self.edtSearch.text())
+            lambda: self.search_credential(self.state.ui.search_field, self.edtSearch.text(),self.state.ui.search_order)
         )
+        # endregion 
+
+        # sitting ordering search by selected field
+        self.cbxDefaultFieldFilter.activated.connect(self.on_search_order)
 
         # region ─ button tips
         self._help_search = PopupHelp(
@@ -187,7 +191,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.btnApply.setEnabled(False)
 
     # region ── Crud methods ──────────────────────────────
-    def search_credential(self, field, filter) -> None:
+    def search_credential(self, field, filter,order_col) -> None:
         try:
             if not field or not filter:
                 return
@@ -208,6 +212,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
                    COUNT(*) OVER() AS total
             FROM credentials
             {where}
+            ORDER BY {order_col or 'ROWID'} ASC
             """
             rows = self.state.db.fetch_all(sql, params)
             self.treeCredentialsResponse.clear()
@@ -488,7 +493,29 @@ class MainWindow(BaseClass, Ui_MainWindow):
         try_key = CryptoVault.derive_key(typed_password, salt_bytes)
         db_hash_bytes = base64.b64decode(self.state.crypto.master_hash)
         return try_key == db_hash_bytes
-    # endregion ────────────────────────────────
+    
+    def _log(self, msg: str, color: Qt.GlobalColor = Qt.GlobalColor.green) -> None:
+        self.logMasterPWD.setReadOnly(True)
+        
+        # Fade out all previous lines
+        cursor = self.logMasterPWD.textCursor()
+        self.logMasterPWD.selectAll()
+        
+        fmt = self.logMasterPWD.currentCharFormat()
+        fmt.setForeground(Qt.GlobalColor.darkGray)
+        self.logMasterPWD.mergeCurrentCharFormat(fmt)
+        
+        # Move to the end and append a new line in default color
+        cursor.movePosition(cursor.MoveOperation.End)
+        self.logMasterPWD.setTextCursor(cursor)
+        
+        fmt.setForeground(color)
+        self.logMasterPWD.setCurrentCharFormat(fmt)
+        self.logMasterPWD.append(msg)
+        
+        # Force an immediate visual update
+        QApplication.processEvents()    
+    # endregion UI helpers ────────────────────────────────
 
     # region ── Qt overrides ──────────────────────────────
     def eventFilter(self, watched, event):
@@ -723,28 +750,12 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
     def on_close_clicked(self) -> None:
         self.close()    
-    # endregion ── Slot button ──────────────────────────────
+    
+    def on_search_order(self):
+        if self.cbxDefaultFieldFilter.currentText() == 'created at':
+            self.state.ui.search_order = 'created_at'
+            return
 
-    def _log(self, msg: str, color: Qt.GlobalColor = Qt.GlobalColor.green) -> None:
-        # self.logMasterPWD.clear()
-        self.logMasterPWD.setReadOnly(True)
-        
-        # esmaece todas as linhas anteriores
-        cursor = self.logMasterPWD.textCursor()
-        self.logMasterPWD.selectAll()
-        
-        fmt = self.logMasterPWD.currentCharFormat()
-        fmt.setForeground(Qt.GlobalColor.darkGray)
-        self.logMasterPWD.mergeCurrentCharFormat(fmt)
-        
-        # move pro final e adiciona linha nova na cor normal
-        cursor.movePosition(cursor.MoveOperation.End)
-        self.logMasterPWD.setTextCursor(cursor)
-        
-        fmt.setForeground(color)
-        # fmt.setForeground(Qt.GlobalColor.green)
-        self.logMasterPWD.setCurrentCharFormat(fmt)
-        self.logMasterPWD.append(msg)
-        
-        # força atualização visual imediata
-        QApplication.processEvents()
+        self.state.ui.search_order = self.cbxDefaultFieldFilter.currentText()
+    
+    # endregion ── Slot button ──────────────────────────────

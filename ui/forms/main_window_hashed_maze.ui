@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_search">
        <property name="styleSheet">
@@ -586,7 +586,7 @@ background-color:rgb(55, 55, 55)
             </property>
             <item>
              <property name="text">
-              <string>-- select a field --</string>
+              <string>id</string>
              </property>
             </item>
             <item>
