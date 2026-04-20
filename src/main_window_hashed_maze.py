@@ -486,7 +486,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.edtSearch.clear()
         self.edtSearch.setPlaceholderText(f"search by {name}")
         self.edtSearch.setFocus()
-        self.lblSearchBy.setText(f"searching by {name}")
+        ordering = self.state.ui.search_order
+        self.lblSearchBy.setText(f"searching by {name} (ordered by: {ordering if ordering else 'id'})")
     
     def verify_password_before_change(self, typed_password: str) -> bool:
         salt_bytes = base64.b64decode(self.state.crypto.salt_hash)
@@ -752,10 +753,12 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.close()    
     
     def on_search_order(self):
-        if self.cbxDefaultFieldFilter.currentText() == 'created at':
-            self.state.ui.search_order = 'created_at'
-            return
+        import re
+        column = self.cbxDefaultFieldFilter.currentText().replace(' ','_')
+        self.state.ui.search_order = column
 
-        self.state.ui.search_order = self.cbxDefaultFieldFilter.currentText()
+        result = re.sub(r'(?<=ordered by: )\S+', f'{column})', self.lblSearchBy.text())
+
+        self.lblSearchBy.setText(result)
     
     # endregion ── Slot button ──────────────────────────────
