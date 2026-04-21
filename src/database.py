@@ -51,9 +51,21 @@ class SQLiteDB:
                 salt       TEXT NOT NULL,
                 created_at DATETIME DEFAULT (CURRENT_TIMESTAMP)
             );
+
+            CREATE TABLE IF NOT EXISTS settings (
+                search_field TEXT NOT NULL DEFAULT 'all fields'
+                    CHECK(search_field IN('all fields','user','url','notes')),
+                sort_by TEXT NOT NULL DEFAULT 'url'
+                    CHECK(sort_by IN('url','user','created_at')),
+                updated_at DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP)
+            );
         """
+
+        insert_settings = "INSERT OR IGNORE INTO settings (rowid) VALUES (1);"
+
         with self._get_connection() as conn:
             conn.executescript(ddl)
+            conn.execute(insert_settings)
             conn.commit()
 
     def execute(self, sql, params: tuple = ()) -> tuple[bool, str]:
