@@ -1,7 +1,9 @@
 # MCacheBox
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
+from operator import truediv
 import os
+import re
 import base64
 import logging
 from doctest import master
@@ -33,7 +35,7 @@ from roundedframe import RoundedFrame
 from src.utils.resource_path import resource_path
 from src.utils.password_strength import calculate_force
 from src.utils.dialogs import confirm_dialog
-from src.core.state import app_state
+from src.core.state import app_state, AppState
 from ui.helpers.animations import shake_widget
 from src.popup_help import PopupHelp
 
@@ -44,7 +46,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
     def __init__(self, app_state, parent=None):
         super().__init__()
         self.setupUi(self)
-        self.state = app_state
+        self.state: AppState = app_state
         self.setFixedSize(self.size())
         self.pBar.setRange(0, 100)
         self.pBar.setTextVisible(False)
@@ -57,21 +59,23 @@ class MainWindow(BaseClass, Ui_MainWindow):
         # decides which screen will be opened
         self._setup_initial_screen()
 
-        # popup_hint (resume)
+        # region ── popup_hint (resume)
         self._popup = PopupHint(dark_mode=True)
         self._last_item = None
         self._hide_timer = QTimer(singleShot=True)
         self._hide_timer.timeout.connect(self._popup.hide)
         self.treeCredentialsResponse.setMouseTracking(True)
         self.treeCredentialsResponse.viewport().installEventFilter(self)
+        # endregion
 
-        # tree widget header adjusts
+        # region ── tree widget header adjusts
         header = self.treeCredentialsResponse.header()
         header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(1, QHeaderView.Stretch)
         header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
         header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        # endregion
 
         # signal/slot connections
         # sitting editing status check ───────────────
@@ -83,7 +87,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.search_actions = {}
         menuSearch = QMenu(self)
 
-        for name in ("all fields","user", "url", "notes"):
+        for name in ("all fields","created_at","user", "url", "notes"):
             act = menuSearch.addAction(name)
             act.triggered.connect(partial(self.set_value_search_variable, name))
             self.search_actions[name] = act  # Save the action by name
@@ -101,8 +105,9 @@ class MainWindow(BaseClass, Ui_MainWindow):
         )
         # endregion 
 
-        # sitting ordering search by selected field
-        self.cbxDefaultFieldFilter.activated.connect(self.on_search_order)
+        # sitting ordering search and field search by selected field
+        self.cbxDefaultFieldSearch.activated.connect(self.on_change_search_field)
+        self.cbxDefaultFieldOrder.activated.connect(self.on_change_search_order)
 
         # region ─ button tips
         self._help_search = PopupHelp(
@@ -189,6 +194,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
         # components config
         self.btnApply.setEnabled(False)
+        self._get_settings()
 
     # region ── Crud methods ──────────────────────────────
     def search_credential(self, field, filter,order_col) -> None:
@@ -196,12 +202,14 @@ class MainWindow(BaseClass, Ui_MainWindow):
             if not field or not filter:
                 return
             
+            # mounting WHERE clause
             if field == "all fields":
                 where = """WHERE user LIKE ? OR
                            url LIKE ? OR
-                           notes LIKE ?                
+                           notes LIKE ? OR
+                           created_at LIKE ?                
                 """ if filter else ""
-                params = (f"%{filter}%", f"%{filter}%", f"%{filter}%") if filter else ()
+                params = (f"%{filter}%", f"%{filter}%", f"%{filter}%", f"%{filter}%") if filter else ()
             else:
                 where = f"WHERE {field} LIKE ?" if filter else ""            
                 params = (f"%{filter}%",) if filter else ()
@@ -426,7 +434,44 @@ class MainWindow(BaseClass, Ui_MainWindow):
             self.show()
         else:
             self.close()
-    # endregion
+
+    def _get_settings(self):
+        sql = "SELECT search_field, sort_by FROM settings WHERE rowid = 1"
+        result = self.state.db.fetch_one(sql)
+        
+        if result:
+            self.state.ui.search_field = result["search_field"]
+            self.state.ui.search_order = result["sort_by"]
+            self.set_value_search_variable(result["search_field"])
+            self.cbxDefaultFieldSearch.setCurrentText(result["search_field"])
+            self.cbxDefaultFieldOrder.setCurrentText(result["sort_by"])
+            return
+        
+        self.state.ui.search_field = "all fields"
+        self.state.ui.search_order = "url"
+
+    def _set_settings(self, settings: dict | None = None) -> bool:
+        if settings is None:
+            settings = {"search_field":"user", "sort_by":"url"}
+
+        cols = ", ".join([f"{key} = ?" for key in settings])
+        sql = f"UPDATE settings SET {cols}"
+        values = tuple(settings.values())
+        
+        try:
+            self.state.db.execute(sql, tuple(values))
+            return True
+        except Exception as e:
+            return False
+
+    def _feedback_settings(self, success: bool):
+        if success:
+            self.lblSettings.setStyleSheet("color: rgb(20, 182, 71);")
+            self.lblSettings.setText("Settings saved")
+        else:
+            self.lblSettings.setStyleSheet("color: rgb(220, 50, 50);")
+            self.lblSettings.setText("Error saving settings")        
+    # endregion ── Setup ─────────────────────────────────────
 
     # region ── UI helpers ────────────────────────────────
     def update_icon(self, index) -> None:
@@ -487,7 +532,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.edtSearch.setPlaceholderText(f"search by {name}")
         self.edtSearch.setFocus()
         ordering = self.state.ui.search_order
-        self.lblSearchBy.setText(f"searching by {name} (ordered by: {ordering if ordering else 'id'})")
+        self.lblSearchBy.setText(f"search by {name} (ordered by {ordering if ordering else 'id'})")
     
     def verify_password_before_change(self, typed_password: str) -> bool:
         salt_bytes = base64.b64decode(self.state.crypto.salt_hash)
@@ -752,13 +797,31 @@ class MainWindow(BaseClass, Ui_MainWindow):
     def on_close_clicked(self) -> None:
         self.close()    
     
-    def on_search_order(self):
-        import re
-        column = self.cbxDefaultFieldFilter.currentText().replace(' ','_')
-        self.state.ui.search_order = column
+    def on_change_search_order(self):
+        column = self.cbxDefaultFieldOrder.currentText().replace(' ','_')
+        self.state.ui.search_order = column        
 
-        result = re.sub(r'(?<=ordered by: )\S+', f'{column})', self.lblSearchBy.text())
+        result = re.sub(r'(?<=ordered by )\S+', f'{column})', self.lblSearchBy.text())
 
         self.lblSearchBy.setText(result)
-    
+        
+        self._feedback_settings(self._set_settings({
+            "search_field": self.cbxDefaultFieldSearch.currentText().replace(' ', '_'),
+            "sort_by": self.cbxDefaultFieldOrder.currentText(),
+        }))
+
+    def on_change_search_field(self):
+        column = self.cbxDefaultFieldSearch.currentText()
+        self.state.ui.search_field = column
+
+        result = re.sub(r'(?<=search by )[^(]+', f'{column} ', self.lblSearchBy.text())
+        self.lblSearchBy.setText(result)
+
+        result = re.sub(r'(?<=search by ).+', column, self.edtSearch.placeholderText())
+        self.edtSearch.setPlaceholderText(result)
+
+        self._feedback_settings(self._set_settings({
+            "search_field": self.cbxDefaultFieldSearch.currentText(),
+            "sort_by": self.cbxDefaultFieldOrder.currentText(),
+        }))
     # endregion ── Slot button ──────────────────────────────

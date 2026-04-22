@@ -54,9 +54,9 @@ class SQLiteDB:
 
             CREATE TABLE IF NOT EXISTS settings (
                 search_field TEXT NOT NULL DEFAULT 'all fields'
-                    CHECK(search_field IN('all fields','user','url','notes')),
+                    CHECK(search_field IN('all fields','created_at','user','url','notes')),
                 sort_by TEXT NOT NULL DEFAULT 'url'
-                    CHECK(sort_by IN('url','user','created_at')),
+                    CHECK(sort_by IN('created_at','user','url')),
                 updated_at DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP)
             );
         """
@@ -104,7 +104,7 @@ class SQLiteDB:
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
     
-    def fetch_one(self, query, params: tuple[Any, ...] = ()) -> dict | None:
+    def fetch_one(self, query:str, params: tuple[Any, ...] = ()) -> sqlite3.Row | None:
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(query, params)

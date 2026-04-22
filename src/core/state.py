@@ -21,11 +21,16 @@ class UIState:
         self.initial_row_items: dict = {}
 
 class AppState:
-    def __init__(self, db_path):
-        # self.db = self.SQLiteDB(db_path)
-        self.db = SQLiteDB(db_path)
+    def __init__(self, db_path: str) -> None:
+        self.db: SQLiteDB = SQLiteDB(db_path)
         self.db.initialize()
-        self.crypto = CryptoState()
-        self.ui = UIState()
+        self.crypto: CryptoState = CryptoState()
+        self.ui: UIState = UIState()
+
+    # def __init__(self, db_path):
+    #     self.db = SQLiteDB(db_path)
+    #     self.db.initialize()
+    #     self.crypto = CryptoState()
+    #     self.ui = UIState()
 
 app_state = AppState(db_path)

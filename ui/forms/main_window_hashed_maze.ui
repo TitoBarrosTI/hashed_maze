@@ -518,16 +518,16 @@ background-color:rgb(55, 55, 55)
              </rect>
             </property>
             <property name="currentIndex">
-             <number>1</number>
+             <number>0</number>
             </property>
             <item>
              <property name="text">
-              <string>-- select a field --</string>
+              <string>all fields</string>
              </property>
             </item>
             <item>
              <property name="text">
-              <string>all fields</string>
+              <string>created_at</string>
              </property>
             </item>
             <item>
@@ -569,10 +569,10 @@ background-color:rgb(55, 55, 55)
              </rect>
             </property>
             <property name="text">
-             <string>Filter results by:</string>
+             <string>Order results by:</string>
             </property>
            </widget>
-           <widget class="QComboBox" name="cbxDefaultFieldFilter">
+           <widget class="QComboBox" name="cbxDefaultFieldOrder">
             <property name="geometry">
              <rect>
               <x>20</x>
@@ -586,12 +586,7 @@ background-color:rgb(55, 55, 55)
             </property>
             <item>
              <property name="text">
-              <string>id</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>created at</string>
+              <string>created_at</string>
              </property>
             </item>
             <item>
@@ -602,11 +597,6 @@ background-color:rgb(55, 55, 55)
             <item>
              <property name="text">
               <string>url</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>notes</string>
              </property>
             </item>
            </widget>
@@ -627,6 +617,27 @@ background-color:rgb(55, 55, 55)
             </property>
             <property name="text">
              <string>?</string>
+            </property>
+           </widget>
+           <widget class="QLabel" name="lblSettings">
+            <property name="geometry">
+             <rect>
+              <x>20</x>
+              <y>160</y>
+              <width>441</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QLabel{
+	color:rgb(20, 182, 71)
+}</string>
+            </property>
+            <property name="text">
+             <string>...</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
             </property>
            </widget>
           </widget>
@@ -711,8 +722,8 @@ background-color:rgb(55, 55, 55)
            <widget class="QPushButton" name="btnSavePWD">
             <property name="geometry">
              <rect>
-              <x>488</x>
-              <y>140</y>
+              <x>270</x>
+              <y>100</y>
               <width>101</width>
               <height>24</height>
              </rect>
@@ -1139,7 +1150,7 @@ background-color: rgba(0, 255, 0, 10); /* Um fundo bem clarinho só pra marcar a
   <tabstop>btnCancel</tabstop>
   <tabstop>edtPlainNotes</tabstop>
   <tabstop>cbxDefaultFieldSearch</tabstop>
-  <tabstop>cbxDefaultFieldFilter</tabstop>
+  <tabstop>cbxDefaultFieldOrder</tabstop>
   <tabstop>edtCurrentPWD</tabstop>
   <tabstop>edtNewPWD</tabstop>
   <tabstop>edtNewPWDConfirm</tabstop>

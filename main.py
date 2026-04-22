@@ -12,7 +12,7 @@ from PySide6.QtWidgets import QApplication
 from src.main_window_hashed_maze import MainWindow
 from src.core.single_instance import is_already_running
 from src.utils.dialogs import info_dialog
-from src.core.state import app_state
+from src.core.state import app_state, AppState
 
 app = QApplication([])
 
