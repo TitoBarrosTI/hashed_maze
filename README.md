@@ -61,45 +61,38 @@ Built with Python and PySide6, it features a clean desktop interface, AES-256-GC
 hashed_maze/
 ├── docs/
 │   └── screenshots/
-│       ├── hashed_maze_about_tab.png
-│       ├── hashed_maze_config_tab.png
-│       ├── hashed_maze_master_password_register.png
-│       ├── hashed_maze_obtaining_password.png
-│       ├── hashed_maze_search_delete_item.png
-│       └── hashed_maze_search_tab.png
 ├── extension/
-│   ├── background.js  # Service worker (Chrome/Edge)
-│   ├── content.js  # Content script for autofill
-│   └── manifest.json  # Extension manifest (MV3)
+│   ├── background.js
+│   ├── content.js
+│   └── manifest.json
 ├── src/
 │   ├── core/
-│   │   ├── single_instance.py  # Ensures single instance execution
-│   │   └── state.py  # Centralized app state
+│   │   ├── single_instance.py
+│   │   └── state.py
 │   ├── native_messaging/
-│   │   └── registry.py  # Windows registry setup for Native Messaging
+│   │   └── registry.py
 │   ├── utils/
-│   │   ├── dialogs.py  # Reusable dialog helpers
-│   │   ├── password_strength.py  # zxcvbn wrapper
-│   │   └── resource_path.py  # Path resolution for bundled assets
-│   ├── bridge.py  # Native Messaging host (Python ↔ Browser)
-│   ├── config.py  # App configuration constants
-│   ├── crypt.py  # AES-256-GCM encryption (CryptoVault)
-│   ├── database.py  # SQLite layer (SQLiteDB)
+│   │   ├── mixins/
+│   │   │   ├── crud_mixin.py
+│   │   │   ├── helpers.py
+│   │   │   ├── security.py
+│   │   │   └── settings.py
+│   │   ├── dialogs.py
+│   │   ├── password_strength.py
+│   │   └── resource_path.py
+│   ├── bridge.py
+│   ├── config.py
+│   ├── crypt.py
+│   ├── database.py
 │   ├── login_window_hashed_maze.py
 │   ├── main_window_hashed_maze.py
 │   ├── master_pass_hashed_maze.py
-│   ├── models.py  # Data models
-│   ├── password_server.py  # Local password server for extension
-│   ├── popup_hint.py  # Hover hint popup widget
-│   └── setup.py  # Native Messaging host registration
+│   ├── models.py
+│   ├── password_server.py
+│   ├── popup_hint.py
+│   └── setup.py
 ├── static/
 │   └── icons/
-│       ├── about_40_green.png
-│       ├── apply_20.png
-│       ├── database_search_40_green.png
-│       ├── settings_40_green.png
-│       ├── visibility_20.png
-│       └── visibility_off_20.png
 ├── ui/
 │   ├── forms/
 │   │   ├── login_window_hashed_maze.ui
@@ -107,16 +100,15 @@ hashed_maze/
 │   │   └── master_pass_hashed_maze.ui
 │   └── helpers/
 │       └── animations.py
-├── host_manifest.json  # Native Messaging host manifest
-├── main.py  # Application entry point
-├── roundedframe.py  # Custom QFrame with rounded corners
-├── run_bridge_python_host.bat  # Launches Native Messaging bridge
+├── host_manifest.json
+├── main.py
+├── roundedframe.py
+├── run_bridge_python_host.bat
 ├── requirements.txt
 ├── LICENCE
 └── README.md
 ```
-
----
+ArquivoDescriçãoextension/background.jsService worker (Chrome/Edge)extension/content.jsContent script for autofillextension/manifest.jsonExtension manifest (MV3)src/core/single_instance.pyEnsures single instance executionsrc/core/state.pyCentralized app statesrc/native_messaging/registry.pyWindows registry setup for Native Messagingsrc/utils/mixins/crud_mixin.pyQt-integrated CRUD for credentials with SQLite and CryptoVault encryptionsrc/utils/mixins/helpers.pyUI helpers: icon switching, pwd strength bar, show/hide toggle, status feedback & logsrc/utils/mixins/security.pyMaster password verification and atomic re-encryption of all credentialssrc/utils/mixins/settings.pySettings persistence: load, save and apply search field/order preferencessrc/bridge.pyNative Messaging host (Python ↔ Browser)src/crypt.pyAES-256-GCM encryption (CryptoVault)src/database.pySQLite layer (SQLiteDB)src/password_server.pyLocal password server for extensionsrc/popup_hint.pyHover hint popup widgethost_manifest.jsonNative Messaging host manifestroundedframe.pyCustom QFrame with rounded corners
 
 ## ⚙️ Installation
 

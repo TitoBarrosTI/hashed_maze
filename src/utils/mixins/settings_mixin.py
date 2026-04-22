@@ -1,3 +1,7 @@
+# MCacheBox
+# Copyright (c) 2026 Tito de Barros Junior
+# Licensed under the MIT License
+
 import re
 from PySide6.QtCore import QTimer
 

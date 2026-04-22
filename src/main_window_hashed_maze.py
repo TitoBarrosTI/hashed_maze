@@ -1,13 +1,13 @@
 # MCacheBox
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
+
 from operator import truediv
 import os
 import re
 import base64
 import logging
 from doctest import master
-import sqlite3
 from functools import partial
 
 from PySide6.QtCore import Qt, QTimer, QSettings, QEvent, QUrl
@@ -39,11 +39,14 @@ from src.core.state import app_state, AppState
 from ui.helpers.animations import shake_widget
 from src.popup_help import PopupHelp
 from src.utils.mixins.settings_mixin import SettingsMixin
+from src.utils.mixins.crud_mixin import CrudMixin
+from src.utils.mixins.helpers_mixin import HelpersMixin
+from src.utils.mixins.security_mixin import SecurityMixin
 
 # Resolve resource path for dev and PyInstaller (_MEIPASS) environments
 Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/main_window_hashed_maze.ui"))  # type: ignore
 
-class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin):
+class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMixin, HelpersMixin):
     def __init__(self, app_state, parent=None):
         super().__init__()
         self.setupUi(self)
@@ -197,232 +200,6 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin):
         self.btnApply.setEnabled(False)
         self._get_settings()
 
-    # region ── Crud methods ──────────────────────────────
-    def search_credential(self, field, filter,order_col) -> None:
-        try:
-            if not field or not filter:
-                return
-            
-            # mounting WHERE clause
-            if field == "all fields":
-                where = """WHERE user LIKE ? OR
-                           url LIKE ? OR
-                           notes LIKE ? OR
-                           created_at LIKE ?                
-                """ if filter else ""
-                params = (f"%{filter}%", f"%{filter}%", f"%{filter}%", f"%{filter}%") if filter else ()
-            else:
-                where = f"WHERE {field} LIKE ?" if filter else ""            
-                params = (f"%{filter}%",) if filter else ()
-
-            sql = f"""
-            SELECT id, user, url, ciphertext, 
-                   salt, nonce, notes, created_at,
-                   COUNT(*) OVER() AS total
-            FROM credentials
-            {where}
-            ORDER BY {order_col or 'ROWID'} ASC
-            """
-            rows = self.state.db.fetch_all(sql, params)
-            self.treeCredentialsResponse.clear()
-
-            if not rows:
-                self.lblResults.setText("-- no results --")
-                return
-
-            self.lblResults.setText(f"results: {str(rows[0]["total"])}")
-            
-            for row in rows:
-                item = QTreeWidgetItem(self.treeCredentialsResponse)
-
-                self.btnDeleteAction = QPushButton("delete")
-                self.btnDeleteAction.setFixedSize(57, 22)
-                self.btnDeleteAction.clicked.connect(
-                    partial(
-                        self.on_click_action,
-                        int(row["id"]),
-                        f"Really wants delete this access account?",
-                        f"id reference: {int(row['id'])}",
-                    )
-                )                
-                self.treeCredentialsResponse.setItemWidget(
-                    item, 5, self.btnDeleteAction
-                )
-
-                item.setText(0, str(row["user"]))
-                item.setText(1, str(row["url"]))
-                item.setText(2, str(row["notes"]))
-                item.setText(3, str(row["ciphertext"]))
-                item.setText(4, str(row["created_at"]))
-                item.setData(0, Qt.ItemDataRole.UserRole, int(row["id"]))
-                
-                # all collumns of credentials in DataRole
-                item.setData(
-                    1,
-                    Qt.ItemDataRole.UserRole,
-                    {
-                        "account": str(row["user"]),
-                        "url": str(row["url"]),
-                        "ciphertext": str(row["ciphertext"]),
-                        "salt": str(row["salt"]),
-                        "nonce": str(row["nonce"]),
-                        "notes": str(row["notes"]),
-                        "created_at": str(row["created_at"]),
-                    },
-                )
-
-        except sqlite3.OperationalError as e:
-            print("Operational error:", e)
-
-        except sqlite3.IntegrityError as e:
-            print("integrity error:", e)
-
-        except sqlite3.Error as e:
-            print("general SQLite error:", e)
-    
-    def update_record(self, table: str, where: str):
-        if table == 'credentials':
-            if not self._required_fields_ok() or not self.state.crypto.decrypted_pass:
-                return (False, "Fill in the required field")
-
-            vault = CryptoVault.encrypt(self.state.crypto.decrypted_pass, self.edtPWD.text())
-
-            data = {
-                "user": self.edtAccount.text(),
-                "url": self.edtURL.text(),
-                "notes": self.edtPlainNotes.toPlainText(),
-                "ciphertext": vault["ciphertext"],
-                "salt": vault["salt"],
-                "nonce": vault["nonce"],
-            }
-        elif table == "hash":
-            if not self.edtNewPWDConfirm.text():
-                return (False, "Fill in the required field")
-            
-            ash_login, salt, hash_b64, salt_b64 = CryptoVault.generate_hash_login(self.edtNewPWDConfirm.text())
-
-            data = {
-                "mkhash": hash_b64,
-                "salt": salt_b64
-            }
-
-        try:
-            if table == 'hash':
-                cols = ", ".join([f"{key} = ?" for key in data.keys()])
-                sql = f"UPDATE {table} SET {cols}"
-                values = tuple(data.values())
-            else:
-                cols = ", ".join([f"{key} = ?" for key in data.keys()])
-                sql = f"UPDATE {table} SET {cols} WHERE {where} = ?"
-                values = list(data.values())
-                values.append(str(self.state.ui.editing_id))
-
-            self.state.db.execute(sql, tuple(values))
-
-            self.btnSearch.click()
-        except Exception as e:
-            print(f"Error on update: {e}")
-
-        self.btnApply.setEnabled(False)
-        self.btnCancel.setEnabled(False)
-        self.on_action_finished()
-
-        return True, "Updated successfully"
-    
-    def insert_record(self, table: str):
-        # obtaining inputs
-        required_inputs = {
-            "user": self.edtAccount.text().strip(),
-            "url": self.edtURL.text().strip(),
-            "ciphertext": self.edtPWD.text().strip(),
-        }
-
-        widget_map = {
-            "user": self.edtAccount,
-            "url": self.edtURL,
-            "ciphertext": self.edtPWD,
-        }
-
-        # if not required inputs, fail
-        for key, value in required_inputs.items():
-            if not value:
-                widget_map[key].setFocus()
-                return False, f"*** {key.title()} is mandatory! ***"
-
-        # generating encrypted password
-        if self.state.crypto.derived_key is None:
-            return False, "Derived_key is None"
-        
-        try:
-            if not self.state.crypto.decrypted_pass is None:
-                vault = CryptoVault.encrypt(self.state.crypto.decrypted_pass, self.edtPWD.text())
-
-            payload = {
-                "user": self.edtAccount.text(),
-                "url": self.edtURL.text(),
-                "notes": self.edtPlainNotes.toPlainText(),
-                "ciphertext": vault["ciphertext"],
-                "salt": vault["salt"],
-                "nonce": vault["nonce"],
-            }
-
-            new_id = self.state.db.insert(table, payload)
-        except Exception as e:
-            return False, f"Error on insert :{e}"
-
-        self.clear_fields(self.fields_to_clean())
-        self.state.ui.editing_id = new_id
-        self.btnApply.setEnabled(False)
-        self.btnCancel.setEnabled(False)
-        self.on_action_finished()
-
-        return True, "Inserted successfully"
-    
-    def load_data_row(self, mapping: dict, item, _) -> None:
-        # visual feedback
-        self.visual_feedback_on_record_status(1)
-        self.state.ui.editing_id = item.data(0, Qt.ItemDataRole.UserRole) # flag edition
-        data_items = item.data(1, Qt.ItemDataRole.UserRole)
-
-        # Saving initial data received from treecredentials for rollback if editing is cancelled
-        self.state.ui.initial_row_items = {
-            k: item.text(i)
-            for i, k in enumerate(["user","url","notes","ciphertext"])
-        }
-
-        for col_index, widget in mapping.items():
-            # special condition for same component type (QLineEdit)
-            if widget == self.edtPWD:
-                if data_items:
-                    ciphertext = data_items.get("ciphertext")
-                    salt = data_items.get("salt")
-                    nonce = data_items.get("nonce")
-                    data_ = {"ciphertext": ciphertext, "salt": salt, "nonce": nonce}
-                    
-                    if self.state.crypto.derived_key is None:
-                        return
-
-                    if not self.state.crypto.decrypted_pass is None:
-                     plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_)
-                     
-                    self.state.crypto.credential_plaintext = plaintext
-                    widget.setText(str(plaintext))
-
-                    # overwrite with plaintext
-                    self.state.ui.initial_row_items["ciphertext"] = str(plaintext)
-                continue
-            
-            value = item.text(col_index)
-
-            if isinstance(widget, (QLineEdit, QLabel)):
-                 widget.setText(str(value))
-            elif isinstance(widget, QPlainTextEdit):
-                widget.setPlainText(str(value))
-            elif isinstance(widget, QListWidget):
-                widget.clear()
-                widget.addItems(str(value).splitlines())
-    # endregion ── Crud methods ────────────────────────────
-
     # region ── Setup ─────────────────────────────────────
     def _setup_initial_screen(self):
         if CryptoVault.has_master_hash():
@@ -438,96 +215,7 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin):
             self.show()
         else:
             self.close()
-
-    # region ── UI helpers ────────────────────────────────
-    def update_icon(self, index) -> None:
-        if index == 0:
-            self.lblIconSearch.setPixmap(QPixmap("static/icons/database_search_40_clear_green"))            
-        if index == 1:
-            self.lblIconConfig.setPixmap(QPixmap("static/icons/settings_40_green.png"))
-        if index == 2:
-            self.lblIconAbout.setPixmap(QPixmap("static/icons/about_40_green.png"))
-    
-    def update_password_force(self, pass_: str):
-        forca = calculate_force(pass_)  # retorn 0-100
-        self.pBar.setValue(forca)
-
-        if forca == 0:
-            cor = "transparent"  # no fill, track appears
-        elif forca < 40:
-            cor = "#e05252"  # red — weak
-        elif forca < 70:
-            cor = "#e0a832"  # yellow — medium
-        else:
-            cor = "#4caf50"  # green — strong
-
-        self.pBar.setStyleSheet(
-            f"""
-            QProgressBar {{
-                background-color: #3a3a3a;
-                border: none;
-                border-radius: 3px;
-                height: 6px;
-            }}
-            QProgressBar::chunk {{
-                background-color: {cor};
-                border-radius: 3px;
-            }}
-        """
-        )
-    
-    def show_pwd(self):
-        if self.edtPWD.echoMode() == QLineEdit.EchoMode.Password:
-            self.edtPWD.setEchoMode(QLineEdit.EchoMode.Normal)
-            self.btnShowPWD.setIcon(QIcon("static/icons/visibility_off_20.png"))
-        else:
-            self.edtPWD.setEchoMode(QLineEdit.EchoMode.Password)
-            self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
-
-    def visual_feedback_on_record_status(self, status = None):
-        # receives integer or None (_editing_id)
-        if not status:
-            self.frmStatusEdition.set_status_colors(None)
-        else:
-            self.frmStatusEdition.set_status_colors("#b7d9b1", "#a3c9a0", "#92b68f")
-    
-    def set_value_search_variable(self, name) -> None:
-        # after select option in context menu search
-        self.state.ui.search_field = name
-        self.edtSearch.clear()
-        self.edtSearch.setPlaceholderText(f"search by {name}")
-        self.edtSearch.setFocus()
-        ordering = self.state.ui.search_order
-        self.lblSearchBy.setText(f"search by {name} (ordered by {ordering if ordering else 'id'})")
-    
-    def verify_password_before_change(self, typed_password: str) -> bool:
-        salt_bytes = base64.b64decode(self.state.crypto.salt_hash) # type: ignore
-        try_key = CryptoVault.derive_key(typed_password, salt_bytes)
-        db_hash_bytes = base64.b64decode(self.state.crypto.master_hash) # type: ignore
-        return try_key == db_hash_bytes
-    
-    def _log(self, msg: str, color: Qt.GlobalColor = Qt.GlobalColor.green) -> None:
-        self.logMasterPWD.setReadOnly(True)
-        
-        # Fade out all previous lines
-        cursor = self.logMasterPWD.textCursor()
-        self.logMasterPWD.selectAll()
-        
-        fmt = self.logMasterPWD.currentCharFormat()
-        fmt.setForeground(Qt.GlobalColor.darkGray)
-        self.logMasterPWD.mergeCurrentCharFormat(fmt)
-        
-        # Move to the end and append a new line in default color
-        cursor.movePosition(cursor.MoveOperation.End)
-        self.logMasterPWD.setTextCursor(cursor)
-        
-        fmt.setForeground(color)
-        self.logMasterPWD.setCurrentCharFormat(fmt)
-        self.logMasterPWD.append(msg)
-        
-        # Force an immediate visual update
-        QApplication.processEvents()    
-    # endregion UI helpers ────────────────────────────────
+    # endregion ── Setup ─────────────────────────────────────
 
     # region ── Qt overrides ──────────────────────────────
     def eventFilter(self, watched, event):
@@ -611,7 +299,7 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin):
         # restoring value of id
         self.state.ui.editing_id = self.state.ui.editing_id_before_cancel
 
-        self.visual_feedback_on_record_status()
+        # self.visual_feedback_on_record_status(None)
         self.handle_action_msg(lambda msg_input: (False, msg_input), "view mode")
         self.btnApply.setEnabled(False)
         self.btnCancel.setEnabled(False)
@@ -636,6 +324,8 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin):
                 if key == 3 and self.state.ui.editing_id is not None:
                     value = self.state.crypto.credential_plaintext or ""
                 widget.setText(value)
+        
+        self.visual_feedback_on_record_status(None)
     
     def on_click_action(self, row_id: int, text: str, informative: str):
         if confirm_dialog(text, informative):
@@ -673,92 +363,6 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin):
         QDesktopServices.openUrl(
             QUrl("https://ko-fi.com/titobarrosti")
         )        
-    
-    def change_master_password(self):
-        # getting/verifying current/new master password
-        typed = self.edtCurrentPWD.text().strip()
-        current = app_state.crypto.decrypted_pass
-        
-        if not typed:
-            self.edtCurrentPWD.setFocus()
-            shake_widget(self, self.edtCurrentPWD)
-            self._log("Interrupted: current memory master password cannot be empty", Qt.GlobalColor.darkYellow)
-            return
-
-        if not current == typed:
-            self.edtCurrentPWD.setFocus()
-            shake_widget(self, self.edtCurrentPWD)
-            self._log(f"Interrupted: typed password {typed} is not correct", Qt.GlobalColor.darkYellow)
-            return
-        
-        # verifying new master password and confirmation
-        new = self.edtNewPWD.text().strip()
-        confirm = self.edtNewPWDConfirm.text().strip()
-
-        if not new == confirm:
-            shake_widget(self, self.edtNewPWD)
-            shake_widget(self, self.edtNewPWDConfirm)
-            self._log(f'Interrupted: new password {new} and confirm {confirm} is not equals', Qt.GlobalColor.darkYellow)
-            return
-
-        fields = {
-            "current pwd": self.edtCurrentPWD,
-            "new pwd": self.edtNewPWD,
-            "confirm pwd": self.edtNewPWDConfirm,
-        }
-
-        for name, field in fields.items():
-            if not field.text().strip():
-                field.setFocus()
-                shake_widget(self, field)
-                self._log(f"Interrupted: field {name} cannot be empty", Qt.GlobalColor.darkYellow)
-                break
-        
-        # re-encrypt all credentials with new password
-        rows = self.state.db.fetch_all("SELECT id, ciphertext, salt, nonce, url FROM credentials")
-        self._log(f"Found {len(rows)} credentials to re-encrypt...")
-        logging.debug(f"Starting re-encryption for {len(rows)} credentials")
-        
-        row = None
-        try:
-            updates = []
-
-            for i, row in enumerate(rows,1):
-                self._log(f"Re-encrypting credential {i} of {len(rows)}...")
-                data_ = {"ciphertext": row["ciphertext"], "salt": row["salt"], "nonce": row["nonce"]}
-                plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_) # type: ignore
-                new_vault = CryptoVault.encrypt(new, plaintext)
-                updates.append((new_vault["ciphertext"], new_vault["salt"], new_vault["nonce"], row["id"]))
-                logging.debug(f"Re-encrypted credential id={row['id']}")
-
-            # new session
-            self._log("Generating new session key...")
-            hash_bytes, salt_bytes, hash_b64, salt_b64 = CryptoVault.generate_hash_login(new)
-
-            # all atomic commiting
-            with self.state.db.transaction() as conn:
-                for upd in updates:
-                    conn.execute("UPDATE credentials SET ciphertext=?, salt=?, nonce=? WHERE id=?", upd)
-                self._log("Updating master hash...")
-                conn.execute("UPDATE hash SET mkhash=?, salt=?", (hash_b64, salt_b64))
-
-            self._log("Done. Master password changed successfully.", color=Qt.GlobalColor.green)
-
-            # region (updating data to crypto state)
-            app_state.crypto.salt_hash = salt_bytes
-            app_state.crypto.master_hash = hash_b64
-            app_state.crypto.decrypted_pass = new
-            # endregion
-        except Exception as e:
-            if row:
-                self._log(
-                    f"Interrupted: {type(e).__name__} - id={row['id']} url={row['url']} "
-                    f"| nonce={row['nonce'][:8]}... salt={row['salt'][:8]}...",
-                    color=Qt.GlobalColor.red
-            )
-            else:
-                self._log(f"Interrupted: {type(e).__name__}: {e!r}", color=Qt.GlobalColor.red)
-            return
 
     def on_close_clicked(self) -> None:
         self.close()    
