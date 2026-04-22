@@ -38,11 +38,12 @@ from src.utils.dialogs import confirm_dialog
 from src.core.state import app_state, AppState
 from ui.helpers.animations import shake_widget
 from src.popup_help import PopupHelp
+from src.utils.mixins.settings_mixin import SettingsMixin
 
 # Resolve resource path for dev and PyInstaller (_MEIPASS) environments
 Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/main_window_hashed_maze.ui"))  # type: ignore
 
-class MainWindow(BaseClass, Ui_MainWindow):
+class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin):
     def __init__(self, app_state, parent=None):
         super().__init__()
         self.setupUi(self)
@@ -438,44 +439,6 @@ class MainWindow(BaseClass, Ui_MainWindow):
         else:
             self.close()
 
-    def _get_settings(self):
-        sql = "SELECT search_field, sort_by FROM settings WHERE rowid = 1"
-        result = self.state.db.fetch_one(sql)
-        
-        if result:
-            self.state.ui.search_field = result["search_field"]
-            self.state.ui.search_order = result["sort_by"]
-            self.set_value_search_variable(result["search_field"])
-            self.cbxDefaultFieldSearch.setCurrentText(result["search_field"])
-            self.cbxDefaultFieldOrder.setCurrentText(result["sort_by"])
-            return
-        
-        self.state.ui.search_field = "all fields"
-        self.state.ui.search_order = "url"
-
-    def _set_settings(self, settings: dict | None = None) -> bool:
-        if settings is None:
-            settings = {"search_field":"user", "sort_by":"url"}
-
-        cols = ", ".join([f"{key} = ?" for key in settings])
-        sql = f"UPDATE settings SET {cols}"
-        values = tuple(settings.values())
-        
-        try:
-            self.state.db.execute(sql, tuple(values))
-            return True
-        except Exception as e:
-            return False
-
-    def _feedback_settings(self, success: bool):
-        if success:
-            self.lblSettings.setStyleSheet("color: rgb(20, 182, 71);")
-            self.lblSettings.setText("Settings saved")
-        else:
-            self.lblSettings.setStyleSheet("color: rgb(220, 50, 50);")
-            self.lblSettings.setText("Error saving settings")        
-    # endregion ── Setup ─────────────────────────────────────
-
     # region ── UI helpers ────────────────────────────────
     def update_icon(self, index) -> None:
         if index == 0:
@@ -799,32 +762,4 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
     def on_close_clicked(self) -> None:
         self.close()    
-    
-    def on_change_search_order(self):
-        column = self.cbxDefaultFieldOrder.currentText().replace(' ','_')
-        self.state.ui.search_order = column        
-
-        result = re.sub(r'(?<=ordered by )\S+', f'{column})', self.lblSearchBy.text())
-
-        self.lblSearchBy.setText(result)
-        
-        self._feedback_settings(self._set_settings({
-            "search_field": self.cbxDefaultFieldSearch.currentText().replace(' ', '_'),
-            "sort_by": self.cbxDefaultFieldOrder.currentText(),
-        }))
-
-    def on_change_search_field(self):
-        column = self.cbxDefaultFieldSearch.currentText()
-        self.state.ui.search_field = column
-
-        result = re.sub(r'(?<=search by )[^(]+', f'{column} ', self.lblSearchBy.text())
-        self.lblSearchBy.setText(result)
-
-        result = re.sub(r'(?<=search by ).+', column, self.edtSearch.placeholderText())
-        self.edtSearch.setPlaceholderText(result)
-
-        self._feedback_settings(self._set_settings({
-            "search_field": self.cbxDefaultFieldSearch.currentText(),
-            "sort_by": self.cbxDefaultFieldOrder.currentText(),
-        }))
     # endregion ── Slot button ──────────────────────────────
