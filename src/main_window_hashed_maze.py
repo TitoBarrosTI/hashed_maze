@@ -70,11 +70,11 @@ class MainWindow(BaseClass, Ui_MainWindow):
 
         # region ── tree widget header adjusts
         header = self.treeCredentialsResponse.header()
-        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(1, QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
         # endregion
 
         # signal/slot connections
@@ -95,7 +95,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.search_actions["all fields"].trigger()
 
         self.btnSearchBy.setMenu(menuSearch)
-        self.btnSearchBy.setPopupMode(QToolButton.InstantPopup)
+        self.btnSearchBy.setPopupMode(QToolButton.ToolButtonPopupMode.InstantPopup)
         self.btnSearch.clicked.connect(
             lambda: self.search_credential(self.state.ui.search_field, self.edtSearch.text(),self.state.ui.search_order)
         )
@@ -281,7 +281,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
     
     def update_record(self, table: str, where: str):
         if table == 'credentials':
-            if not self._required_fields_ok():
+            if not self._required_fields_ok() or not self.state.crypto.decrypted_pass:
                 return (False, "Fill in the required field")
 
             vault = CryptoVault.encrypt(self.state.crypto.decrypted_pass, self.edtPWD.text())
@@ -314,7 +314,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
                 cols = ", ".join([f"{key} = ?" for key in data.keys()])
                 sql = f"UPDATE {table} SET {cols} WHERE {where} = ?"
                 values = list(data.values())
-                values.append(self.state.ui.editing_id)
+                values.append(str(self.state.ui.editing_id))
 
             self.state.db.execute(sql, tuple(values))
 
@@ -353,7 +353,8 @@ class MainWindow(BaseClass, Ui_MainWindow):
             return False, "Derived_key is None"
         
         try:
-            vault = CryptoVault.encrypt(self.state.crypto.decrypted_pass, self.edtPWD.text())
+            if not self.state.crypto.decrypted_pass is None:
+                vault = CryptoVault.encrypt(self.state.crypto.decrypted_pass, self.edtPWD.text())
 
             payload = {
                 "user": self.edtAccount.text(),
@@ -400,8 +401,10 @@ class MainWindow(BaseClass, Ui_MainWindow):
                     if self.state.crypto.derived_key is None:
                         return
 
-                    plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_)
-                    self.state.ui.credential_plaintext = plaintext
+                    if not self.state.crypto.decrypted_pass is None:
+                     plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_)
+                     
+                    self.state.crypto.credential_plaintext = plaintext
                     widget.setText(str(plaintext))
 
                     # overwrite with plaintext
@@ -535,9 +538,9 @@ class MainWindow(BaseClass, Ui_MainWindow):
         self.lblSearchBy.setText(f"search by {name} (ordered by {ordering if ordering else 'id'})")
     
     def verify_password_before_change(self, typed_password: str) -> bool:
-        salt_bytes = base64.b64decode(self.state.crypto.salt_hash)
+        salt_bytes = base64.b64decode(self.state.crypto.salt_hash) # type: ignore
         try_key = CryptoVault.derive_key(typed_password, salt_bytes)
-        db_hash_bytes = base64.b64decode(self.state.crypto.master_hash)
+        db_hash_bytes = base64.b64decode(self.state.crypto.master_hash) # type: ignore
         return try_key == db_hash_bytes
     
     def _log(self, msg: str, color: Qt.GlobalColor = Qt.GlobalColor.green) -> None:
@@ -668,13 +671,13 @@ class MainWindow(BaseClass, Ui_MainWindow):
             else:
                 # if it's ciphertext only and has listed items
                 if key == 3 and self.state.ui.editing_id is not None:
-                    value = self.state.ui.credential_plaintext or ""
+                    value = self.state.crypto.credential_plaintext or ""
                 widget.setText(value)
     
     def on_click_action(self, row_id: int, text: str, informative: str):
         if confirm_dialog(text, informative):
             self.state.db.execute("DELETE FROM credentials WHERE id = ?", (row_id,))
-            self.search_credential(self.state.ui.search_field, self.edtSearch.text())
+            self.search_credential(self.state.ui.search_field, self.edtSearch.text(),self.state.ui.search_order)
             self.btnSearch.click()
             self.clear_fields(self.fields_to_clean())
     
@@ -760,7 +763,7 @@ class MainWindow(BaseClass, Ui_MainWindow):
             for i, row in enumerate(rows,1):
                 self._log(f"Re-encrypting credential {i} of {len(rows)}...")
                 data_ = {"ciphertext": row["ciphertext"], "salt": row["salt"], "nonce": row["nonce"]}
-                plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_)
+                plaintext = CryptoVault.decrypt(self.state.crypto.decrypted_pass, data_) # type: ignore
                 new_vault = CryptoVault.encrypt(new, plaintext)
                 updates.append((new_vault["ciphertext"], new_vault["salt"], new_vault["nonce"], row["id"]))
                 logging.debug(f"Re-encrypted credential id={row['id']}")
