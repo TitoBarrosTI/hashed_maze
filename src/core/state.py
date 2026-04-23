@@ -19,6 +19,7 @@ class UIState:
         self.editing_id: int | None = None
         self.editing_id_before_cancel: int | None = None
         self.initial_row_items: dict = {}
+        self.logoff_time: int | None = None
 
 class AppState:
     def __init__(self, db_path: str) -> None:
@@ -26,11 +27,6 @@ class AppState:
         self.db.initialize()
         self.crypto: CryptoState = CryptoState()
         self.ui: UIState = UIState()
-
-    # def __init__(self, db_path):
-    #     self.db = SQLiteDB(db_path)
-    #     self.db.initialize()
-    #     self.crypto = CryptoState()
-    #     self.ui = UIState()
+        self.server_started: bool = False
 
 app_state = AppState(db_path)

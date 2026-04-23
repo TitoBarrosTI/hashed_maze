@@ -57,6 +57,8 @@ class SQLiteDB:
                     CHECK(search_field IN('all fields','created_at','user','url','notes')),
                 sort_by TEXT NOT NULL DEFAULT 'url'
                     CHECK(sort_by IN('created_at','user','url')),
+                logoff_time INT NOT NULL DEFAULT 300000
+                    CHECK (logoff_time >= 120000),
                 updated_at DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP)
             );
         """

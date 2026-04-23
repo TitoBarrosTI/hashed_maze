@@ -10,7 +10,7 @@ REGISTRY_KEY = r"Software\Microsoft\Edge\NativeMessagingHosts\com.hashed_maze"
 REGISTRY_KEY_CHROME = r"Software\Google\Chrome\NativeMessagingHosts\com.hashed_maze"
 
 def run_setup():
-    base = Path(__file__).parent.parent  # raiz do projeto
+    base = Path(__file__).parent.parent  # root project
     manifest_path = base / "host_manifest.json"
     bat_path = base / "run_bridge_python_host.bat"
 

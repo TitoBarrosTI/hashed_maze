@@ -61,8 +61,10 @@ class LoginWindow(BaseClass,Ui_MainWindow):
         if self.login(typed_password):
             # start local IPC server to allow external components (e.g., extension) 
             # to retrieve the master password at runtime
-            if not hasattr(self, "_server_started"):
-                self._server_started = True
+            # if not hasattr(self, "_server_started"):
+            if not self.app_state.server_started:
+                # self._server_started = True
+                self.app_state.server_started = True
                 server_thread = threading.Thread(target=run_server, daemon=True)
                 server_thread.start()
 
@@ -113,7 +115,7 @@ class LoginWindow(BaseClass,Ui_MainWindow):
             self.app_state.crypto.salt = master.salt
             self.app_state.crypto.decrypted_pass = typed_password
             self.app_state.crypto.derived_key = try_key
-            # self.app_state.crypto.derived_key = typed_password
+            self.edtPWD.setText('')
             return True
         
         return False

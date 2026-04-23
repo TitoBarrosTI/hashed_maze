@@ -7,12 +7,13 @@ from PySide6.QtCore import QTimer
 
 class SettingsMixin:
     def _get_settings(self):
-        sql = "SELECT search_field, sort_by FROM settings WHERE rowid = 1"
+        sql = "SELECT search_field, sort_by, logoff_time FROM settings WHERE rowid = 1"
         result = self.state.db.fetch_one(sql)
         
         if result:
             self.state.ui.search_field = result["search_field"]
             self.state.ui.search_order = result["sort_by"]
+            self.state.ui.logoff_time =  result["logoff_time"]
             self.set_value_search_variable(result["search_field"])
             self.cbxDefaultFieldSearch.setCurrentText(result["search_field"])
             self.cbxDefaultFieldOrder.setCurrentText(result["sort_by"])
@@ -23,12 +24,12 @@ class SettingsMixin:
 
     def _set_settings(self, settings: dict | None = None) -> bool:
         if settings is None:
-            settings = {"search_field":"user", "sort_by":"url"}
+            settings = {"search_field":"user", "sort_by":"url", "logoff_time":"300000"}
 
         cols = ", ".join([f"{key} = ?" for key in settings])
         sql = f"UPDATE settings SET {cols}"
         values = tuple(settings.values())
-        
+
         try:
             self.state.db.execute(sql, tuple(values))
             return True
@@ -53,9 +54,11 @@ class SettingsMixin:
 
         self.lblSearchBy.setText(result)
         
+        # save settings
         self._feedback_settings(self._set_settings({
-            "search_field": self.cbxDefaultFieldSearch.currentText().replace(' ', '_'),
+            "search_field": self.cbxDefaultFieldSearch.currentText(), #.replace(' ', '_'),
             "sort_by": self.cbxDefaultFieldOrder.currentText(),
+            "logoff_time": int(self.cbxLogoffTime.currentText()),
         }))
 
     def on_change_search_field(self):
@@ -68,7 +71,9 @@ class SettingsMixin:
         result = re.sub(r'(?<=search by ).+', column, self.edtSearch.placeholderText())
         self.edtSearch.setPlaceholderText(result)
 
+        # save settings
         self._feedback_settings(self._set_settings({
             "search_field": self.cbxDefaultFieldSearch.currentText(),
             "sort_by": self.cbxDefaultFieldOrder.currentText(),
+            "logoff_time": int(self.cbxLogoffTime.currentText()),
         }))

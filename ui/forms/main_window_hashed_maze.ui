@@ -640,6 +640,47 @@ background-color:rgb(55, 55, 55)
              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
             </property>
            </widget>
+           <widget class="QComboBox" name="cbxLogoffTime">
+            <property name="geometry">
+             <rect>
+              <x>310</x>
+              <y>50</y>
+              <width>111</width>
+              <height>24</height>
+             </rect>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>120000</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>300000</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>600000</string>
+             </property>
+            </item>
+           </widget>
+           <widget class="QLabel" name="label_12">
+            <property name="geometry">
+             <rect>
+              <x>315</x>
+              <y>30</y>
+              <width>91</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Logoff time:</string>
+            </property>
+           </widget>
           </widget>
           <widget class="QLabel" name="lblCFGDatabaseDirectory">
            <property name="geometry">
@@ -1125,7 +1166,11 @@ background-color: rgba(0, 255, 0, 10); /* Um fundo bem clarinho só pra marcar a
     </rect>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+  </widget>
  </widget>
  <customwidgets>
   <customwidget>

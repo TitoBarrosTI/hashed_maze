@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 import logging
 from ui.helpers.animations import shake_widget
 
@@ -103,3 +103,26 @@ class SecurityMixin():
                 else:
                     self._log(f"Interrupted: {type(e).__name__}: {e!r}", color=Qt.GlobalColor.red)
                 return
+
+    def auto_logoff(self):
+        self.state.crypto.decrypted_pass = None
+        self._do_login()
+    
+    def _reset_logoff_timer(self):
+        if hasattr(self, '_logoff_timer'):
+            self._logoff_timer.stop()
+        self._logoff_timer = QTimer(self)
+        self._logoff_timer.setSingleShot(True)
+        self._logoff_timer.timeout.connect(self.auto_logoff)
+        self._logoff_timer.start(self.state.ui.logoff_time or 300_000)
+
+        # atualiza o display
+        if not hasattr(self, '_countdown_timer'):
+            self._countdown_timer = QTimer(self)
+            self._countdown_timer.timeout.connect(self._update_countdown)
+            self._countdown_timer.start(1000)
+
+    def _update_countdown(self):
+        if hasattr(self, '_logoff_timer'):
+            remaining = self._logoff_timer.remainingTime() // 1000
+            self.statusBar().showMessage(f"logoff in: {remaining}s")

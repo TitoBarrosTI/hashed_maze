@@ -50,6 +50,12 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
     def __init__(self, app_state, parent=None):
         super().__init__()
         self.setupUi(self)
+        
+        # propagates mouse tracking to all window children (logoff timer helper)
+        for widget in self.findChildren(QWidget):
+            widget.setMouseTracking(True)
+        self.setMouseTracking(True)
+        
         self.state: AppState = app_state
         self.setFixedSize(self.size())
         self.pBar.setRange(0, 100)
@@ -112,6 +118,7 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
         # sitting ordering search and field search by selected field
         self.cbxDefaultFieldSearch.activated.connect(self.on_change_search_field)
         self.cbxDefaultFieldOrder.activated.connect(self.on_change_search_order)
+        self.cbxLogoffTime.activated.connect(self.on_change_search_order)
 
         # region ─ button tips
         self._help_search = PopupHelp(
@@ -202,22 +209,32 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
 
     # region ── Setup ─────────────────────────────────────
     def _setup_initial_screen(self):
+        self._do_login()
+
+    def _do_login(self):
         if CryptoVault.has_master_hash():
             from src.login_window_hashed_maze import LoginWindow
             self.login_or_hash = LoginWindow(self.state, parent=self)
         else:
             from src.master_pass_hashed_maze import MasterPass
             self.login_or_hash = MasterPass(app_state, parent=self)
-        
+
         self.hide()
 
         if self.login_or_hash.exec():
+            self.setWindowState(Qt.WindowState.WindowNoState)
             self.show()
+            self.activateWindow()
+            self._reset_logoff_timer()
         else:
             self.close()
     # endregion ── Setup ─────────────────────────────────────
 
     # region ── Qt overrides ──────────────────────────────
+    def mouseMoveEvent(self, event):
+        self._reset_logoff_timer()
+        super().mouseMoveEvent(event)
+
     def eventFilter(self, watched, event):
         if (
             watched is self.treeCredentialsResponse.viewport()
@@ -243,8 +260,9 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
                 self._last_item = None
 
         return super().eventFilter(watched, event)
-    # evitar maximizar a tela
+    
     def changeEvent(self, event):
+        # evitar maximizar a tela
         if isinstance(event, QWindowStateChangeEvent):
             if self.windowState() & Qt.WindowState.WindowMaximized:
                 self.setWindowState(Qt.WindowState.WindowNoState)

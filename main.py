@@ -2,7 +2,6 @@
 # Copyright (C) 2026 Tito de Barros Junior
 # Lincensed under the MIT License
 
-
 import signal
 import sys
 
@@ -25,4 +24,5 @@ run_setup()
 
 window = MainWindow(app_state)
 
+app.setQuitOnLastWindowClosed(False)
 app.exec()
