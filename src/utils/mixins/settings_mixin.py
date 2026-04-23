@@ -32,6 +32,8 @@ class SettingsMixin:
 
         try:
             self.state.db.execute(sql, tuple(values))
+            self.state.ui.logoff_time = settings.get("logoff_time")
+            
             return True
         except Exception as e:
             return False
