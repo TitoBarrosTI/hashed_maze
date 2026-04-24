@@ -12,13 +12,13 @@ from src.crypt import CryptoVault
 
 # class SecurityMixin(HelpersMixin):
 class SecurityMixin():
-    def verify_password_before_change(self, typed_password: str) -> bool:
+    def verify_password_before_change(self: "MainWindow", typed_password: str) -> bool:
         salt_bytes = base64.b64decode(self.state.crypto.salt_hash) # type: ignore
         try_key = CryptoVault.derive_key(typed_password, salt_bytes)
         db_hash_bytes = base64.b64decode(self.state.crypto.master_hash) # type: ignore
         return try_key == db_hash_bytes
     
-    def change_master_password(self):
+    def change_master_password(self: "MainWindow"):
             # getting/verifying current/new master password
             typed = self.edtCurrentPWD.text().strip()
             current = app_state.crypto.decrypted_pass
@@ -108,13 +108,16 @@ class SecurityMixin():
         self.state.crypto.decrypted_pass = None
         self._do_login()
     
-    def _reset_logoff_timer(self):
+    def _reset_logoff_timer(self: "MainWindow"):
         if hasattr(self, '_logoff_timer'):
             self._logoff_timer.stop()
         self._logoff_timer = QTimer(self)
         self._logoff_timer.setSingleShot(True)
         self._logoff_timer.timeout.connect(self.auto_logoff)
-        self._logoff_timer.start(self.state.ui.logoff_time or 300_000)
+        
+        # only starts timer if value its above 0
+        if self.state.ui.logoff_time != 0:
+            self._logoff_timer.start(self.state.ui.logoff_time)
 
         # atualiza o display
         if not hasattr(self, '_countdown_timer'):
@@ -122,7 +125,9 @@ class SecurityMixin():
             self._countdown_timer.timeout.connect(self._update_countdown)
             self._countdown_timer.start(1000)
 
-    def _update_countdown(self):
+    def _update_countdown(self: "MainWindow"):
         if hasattr(self, '_logoff_timer'):
             remaining = self._logoff_timer.remainingTime() // 1000
-            self.statusBar().showMessage(f"logoff in: {remaining}s")
+            self.statusBar().showMessage(
+                f"logoff in: {remaining}s" if self.state.ui.logoff_time != 0 else "auto-logoff disabled"
+            )

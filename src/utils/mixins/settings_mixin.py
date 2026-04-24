@@ -6,7 +6,7 @@ import re
 from PySide6.QtCore import QTimer
 
 class SettingsMixin:
-    def _get_settings(self):
+    def _get_settings(self: "MainWindow"):
         sql = "SELECT search_field, sort_by, logoff_time FROM settings WHERE rowid = 1"
         result = self.state.db.fetch_one(sql)
         
@@ -17,12 +17,13 @@ class SettingsMixin:
             self.set_value_search_variable(result["search_field"])
             self.cbxDefaultFieldSearch.setCurrentText(result["search_field"])
             self.cbxDefaultFieldOrder.setCurrentText(result["sort_by"])
+            self.cbxLogoffTime.setCurrentText('-' if result["logoff_time"] == 0 else str(result["logoff_time"]))
             return
         
         self.state.ui.search_field = "all fields"
         self.state.ui.search_order = "url"
 
-    def _set_settings(self, settings: dict | None = None) -> bool:
+    def _set_settings(self: "MainWindow", settings: dict | None = None) -> bool:
         if settings is None:
             settings = {"search_field":"user", "sort_by":"url", "logoff_time":"300000"}
 
@@ -33,12 +34,11 @@ class SettingsMixin:
         try:
             self.state.db.execute(sql, tuple(values))
             self.state.ui.logoff_time = settings.get("logoff_time")
-            
             return True
         except Exception as e:
             return False
 
-    def _feedback_settings(self, success: bool):
+    def _feedback_settings(self: "MainWindow", success: bool):
         if success:
             self.lblSettings.setStyleSheet("color: rgb(20, 182, 71);")
             self.lblSettings.setText("Settings saved")
@@ -48,7 +48,7 @@ class SettingsMixin:
         
         QTimer.singleShot(5000, lambda: self.lblSettings.setStyleSheet("color: rgb(160, 160, 160);"))
 
-    def on_change_search_order(self):
+    def on_change_search_order(self: "MainWindow"):
         column = self.cbxDefaultFieldOrder.currentText().replace(' ','_')
         self.state.ui.search_order = column        
 
@@ -60,10 +60,10 @@ class SettingsMixin:
         self._feedback_settings(self._set_settings({
             "search_field": self.cbxDefaultFieldSearch.currentText(), #.replace(' ', '_'),
             "sort_by": self.cbxDefaultFieldOrder.currentText(),
-            "logoff_time": int(self.cbxLogoffTime.currentText()),
+            "logoff_time": int(self.cbxLogoffTime.currentText()) if self.cbxLogoffTime.currentText() != '-' else 0,
         }))
 
-    def on_change_search_field(self):
+    def on_change_search_field(self: "MainWindow"):
         column = self.cbxDefaultFieldSearch.currentText()
         self.state.ui.search_field = column
 
@@ -77,5 +77,5 @@ class SettingsMixin:
         self._feedback_settings(self._set_settings({
             "search_field": self.cbxDefaultFieldSearch.currentText(),
             "sort_by": self.cbxDefaultFieldOrder.currentText(),
-            "logoff_time": int(self.cbxLogoffTime.currentText()),
+            "logoff_time": int(self.cbxLogoffTime.currentText()) if self.cbxLogoffTime.currentText() != '-' else 0,
         }))

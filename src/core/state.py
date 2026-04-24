@@ -19,7 +19,7 @@ class UIState:
         self.editing_id: int | None = None
         self.editing_id_before_cancel: int | None = None
         self.initial_row_items: dict = {}
-        self.logoff_time: int | None = None
+        self.logoff_time: int = 0
 
 class AppState:
     def __init__(self, db_path: str) -> None:

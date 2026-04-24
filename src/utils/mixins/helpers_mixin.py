@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
 from src.utils.password_strength import calculate_force
 
 class HelpersMixin:
-    def update_icon(self, index) -> None:
+    def update_icon(self: "MainWindow", index) -> None:
         if index == 0:
             self.lblIconSearch.setPixmap(QPixmap("static/icons/database_search_40_clear_green"))            
         if index == 1:
@@ -20,7 +20,7 @@ class HelpersMixin:
         if index == 2:
             self.lblIconAbout.setPixmap(QPixmap("static/icons/about_40_green.png"))
     
-    def update_password_force(self, pass_: str):
+    def update_password_force(self: "MainWindow", pass_: str):
         forca = calculate_force(pass_)  # retorn 0-100
         self.pBar.setValue(forca)
 
@@ -48,7 +48,7 @@ class HelpersMixin:
         """
         )
     
-    def show_pwd(self):
+    def show_pwd(self: "MainWindow"):
         if self.edtPWD.echoMode() == QLineEdit.EchoMode.Password:
             self.edtPWD.setEchoMode(QLineEdit.EchoMode.Normal)
             self.btnShowPWD.setIcon(QIcon("static/icons/visibility_off_20.png"))
@@ -56,7 +56,7 @@ class HelpersMixin:
             self.edtPWD.setEchoMode(QLineEdit.EchoMode.Password)
             self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
 
-    def visual_feedback_on_record_status(self, status = None):
+    def visual_feedback_on_record_status(self: "MainWindow", status = None):
         # receives integer or None (_editing_id)
         if status is None:
             # self.frmStatusEdition.set_status_colors("#1e1e1e", "#1e1e1e", "#1e1e1e")
@@ -64,7 +64,7 @@ class HelpersMixin:
         else:
             self.frmStatusEdition.set_status_colors("#b7d9b1", "#a3c9a0", "#92b68f")
     
-    def set_value_search_variable(self, name) -> None:
+    def set_value_search_variable(self: "MainWindow", name) -> None:
         # after select option in context menu search
         self.state.ui.search_field = name
         self.edtSearch.clear()
@@ -73,7 +73,7 @@ class HelpersMixin:
         ordering = self.state.ui.search_order
         self.lblSearchBy.setText(f"search by {name} (ordered by {ordering if ordering else 'id'})")
   
-    def _log(self, msg: str, color: Qt.GlobalColor = Qt.GlobalColor.green) -> None:
+    def _log(self: "MainWindow", msg: str, color: Qt.GlobalColor = Qt.GlobalColor.green) -> None:
         self.logMasterPWD.setReadOnly(True)
         
         # Fade out all previous lines

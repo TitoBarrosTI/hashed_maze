@@ -17,7 +17,7 @@ import sqlite3
 from src.crypt import CryptoVault
 
 class CrudMixin:
-    def search_credential(self, field, filter,order_col) -> None:
+    def search_credential(self: "MainWindow", field, filter,order_col) -> None:
         try:
             if not field or not filter:
                 return
@@ -99,7 +99,7 @@ class CrudMixin:
         except sqlite3.Error as e:
             print("general SQLite error:", e)
 
-    def update_record(self, table: str, where: str):
+    def update_record(self: "MainWindow", table: str, where: str):
         if table == 'credentials':
             if not self._required_fields_ok() or not self.state.crypto.decrypted_pass:
                 return (False, "Fill in the required field")
@@ -148,7 +148,7 @@ class CrudMixin:
 
         return True, "Updated successfully"
     
-    def insert_record(self, table: str):
+    def insert_record(self: "MainWindow", table: str):
         # obtaining inputs
         required_inputs = {
             "user": self.edtAccount.text().strip(),
@@ -197,7 +197,7 @@ class CrudMixin:
 
         return True, "Inserted successfully"    
     
-    def load_data_row(self, mapping: dict, item, _) -> None:
+    def load_data_row(self: "MainWindow", mapping: dict, item, _) -> None:
         # visual feedback
         self.visual_feedback_on_record_status(1)
         self.state.ui.editing_id = item.data(0, Qt.ItemDataRole.UserRole) # flag edition
