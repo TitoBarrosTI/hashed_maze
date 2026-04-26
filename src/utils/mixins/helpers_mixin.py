@@ -2,7 +2,7 @@
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QPixmap, QIcon
 from PySide6.QtWidgets import (
     QApplication,
@@ -52,6 +52,10 @@ class HelpersMixin:
         if self.edtPWD.echoMode() == QLineEdit.EchoMode.Password:
             self.edtPWD.setEchoMode(QLineEdit.EchoMode.Normal)
             self.btnShowPWD.setIcon(QIcon("static/icons/visibility_off_20.png"))
+            QTimer.singleShot(10000,lambda: (
+                self.edtPWD.setEchoMode(QLineEdit.EchoMode.Password),
+                self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
+            ))
         else:
             self.edtPWD.setEchoMode(QLineEdit.EchoMode.Password)
             self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
