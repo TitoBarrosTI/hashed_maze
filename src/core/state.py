@@ -21,6 +21,14 @@ class UIState:
         self.initial_row_items: dict = {}
         self.logoff_time: int = 0
         self.color_scheme: str | None = None
+        # pagination
+        self.current_page: int = 0
+        self.total_pages: int = 0
+        self.page_size: int = 50
+        # last search params (reused on page navigation)
+        self.last_field: str = ""
+        self.last_filter: str = ""
+        self.last_order: str = ""
 
 class AppState:
     def __init__(self, db_path: str) -> None:

@@ -17,8 +17,12 @@ import sqlite3
 from src.crypt import CryptoVault
 
 class CrudMixin:
-    def search_credential(self: "MainWindow", field, filter,order_col) -> None:
+    def search_credential(self: "MainWindow", field, filter, order_col, page: int = 0) -> None:
         try:
+            self.state.ui.last_field = field
+            self.state.ui.last_filter = filter
+            self.state.ui.last_order = order_col
+
             if not field or not filter:
                 return
             
@@ -34,6 +38,9 @@ class CrudMixin:
                 where = f"WHERE {field} LIKE ?" if filter else ""            
                 params = (f"%{filter}%",) if filter else ()
 
+            self.state.ui.current_page = page
+            offset = page * self.state.ui.page_size
+            
             sql = f"""
             SELECT id, user, url, ciphertext, 
                    salt, nonce, notes, created_at,
@@ -41,15 +48,23 @@ class CrudMixin:
             FROM credentials
             {where}
             ORDER BY {order_col or 'ROWID'} ASC
+            LIMIT {self.state.ui.page_size} OFFSET {offset}
             """
+
             rows = self.state.db.fetch_all(sql, params)
             self.treeCredentialsResponse.clear()
 
             if not rows:
                 self.lblResults.setText("-- no results --")
+                self.lblPagination.setText("0 of 0")
+                self._update_pagination_buttons()
                 return
 
-            self.lblResults.setText(f"results: {str(rows[0]["total"])}")
+            total_records = rows[0]["total"]
+            self.state.ui.total_pages = -(-total_records // self.state.ui.page_size)  # ceil division
+            
+            self.lblResults.setText(f"results: {total_records}")
+            self.lblPagination.setText(f"{page + 1} of {self.state.ui.total_pages}")            
             
             for row in rows:
                 item = QTreeWidgetItem(self.treeCredentialsResponse)
@@ -89,6 +104,8 @@ class CrudMixin:
                         "created_at": str(row["created_at"]),
                     },
                 )
+            
+            self._update_pagination_buttons()
 
         except sqlite3.OperationalError as e:
             print("Operational error:", e)
@@ -241,3 +258,45 @@ class CrudMixin:
                 widget.clear()
                 widget.addItems(str(value).splitlines())
     
+    # region ── pagination commands ──────────────────────────────
+    def _update_pagination_buttons(self: "MainWindow") -> None:
+        at_first = self.state.ui.current_page == 0
+        at_last = self.state.ui.current_page >= self.state.ui.total_pages - 1
+
+        self.btnFirst.setEnabled(not at_first)
+        self.btnGoBack.setEnabled(not at_first)
+        self.btnGoForward.setEnabled(not at_last)
+        self.btnLast.setEnabled(not at_last)
+    
+    def _go_first_page(self: "MainWindow") -> None:
+        self.search_credential(
+            self.state.ui.last_field,
+            self.state.ui.last_filter,
+            self.state.ui.last_order,
+            page=0
+        )
+
+    def _go_prev_page(self: "MainWindow") -> None:
+        self.search_credential(
+            self.state.ui.last_field,
+            self.state.ui.last_filter,
+            self.state.ui.last_order,
+            page=self.state.ui.current_page - 1
+        )
+
+    def _go_next_page(self: "MainWindow") -> None:
+        self.search_credential(
+            self.state.ui.last_field,
+            self.state.ui.last_filter,
+            self.state.ui.last_order,
+            page=self.state.ui.current_page + 1
+        )
+
+    def _go_last_page(self: "MainWindow") -> None:
+        self.search_credential(
+            self.state.ui.last_field,
+            self.state.ui.last_filter,
+            self.state.ui.last_order,
+            page=self.state.ui.total_pages - 1
+        )
+    # endregion ── pagination commands ──────────────────────────────

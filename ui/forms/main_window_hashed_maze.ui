@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_search">
        <property name="styleSheet">
@@ -41,7 +41,7 @@
             <rect>
              <x>20</x>
              <y>24</y>
-             <width>91</width>
+             <width>81</width>
              <height>26</height>
             </rect>
            </property>
@@ -55,9 +55,9 @@
           <widget class="QLineEdit" name="edtSearch">
            <property name="geometry">
             <rect>
-             <x>210</x>
+             <x>193</x>
              <y>26</y>
-             <width>371</width>
+             <width>281</width>
              <height>23</height>
             </rect>
            </property>
@@ -105,9 +105,9 @@
           <widget class="QPushButton" name="btnSearch">
            <property name="geometry">
             <rect>
-             <x>114</x>
+             <x>104</x>
              <y>25</y>
-             <width>79</width>
+             <width>69</width>
              <height>24</height>
             </rect>
            </property>
@@ -403,9 +403,9 @@
           <widget class="QLabel" name="lblSearchBy">
            <property name="geometry">
             <rect>
-             <x>212</x>
+             <x>195</x>
              <y>49</y>
-             <width>361</width>
+             <width>271</width>
              <height>16</height>
             </rect>
            </property>
@@ -459,6 +459,72 @@
            <property name="text">
             <string>?</string>
            </property>
+          </widget>
+          <widget class="QFrame" name="frmNavegationResults">
+           <property name="geometry">
+            <rect>
+             <x>487</x>
+             <y>17</y>
+             <width>300</width>
+             <height>40</height>
+            </rect>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::Shape::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Shadow::Raised</enum>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QPushButton" name="btnFirst">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnGoBack">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnGoForward">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="btnLast">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="lblPagination">
+              <property name="text">
+               <string>-- pagination --</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </widget>
         </item>

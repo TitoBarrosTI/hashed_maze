@@ -169,7 +169,13 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
         
         self.btnGenRandomPWD.clicked.connect(lambda e: self.edtPWD.setText(generate_random_password()))
         # endregion ─ button tips
-        
+
+        # result pagination
+        self.btnFirst.clicked.connect(self._go_first_page)
+        self.btnGoBack.clicked.connect(self._go_prev_page)
+        self.btnGoForward.clicked.connect(self._go_next_page)
+        self.btnLast.clicked.connect(self._go_last_page)        
+
         # endregion signal/slot connections
 
         # target fields for tree item data
@@ -198,6 +204,10 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
         self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
         self.btnApply.setIcon(QIcon("static/icons/apply_20.png"))
         self.lblBG.setPixmap(QPixmap("docs/screenshots/bgabout.jpg"))
+        self.btnFirst.setIcon(QIcon("static/icons/first_page_20.png"))
+        self.btnGoBack.setIcon(QIcon("static/icons/back_page_20.png"))
+        self.btnGoForward.setIcon(QIcon("static/icons/forward_page_20.png"))
+        self.btnLast.setIcon(QIcon("static/icons/last_page_20.png"))
         # endregion ── icons/images tasks
 
         self.btnLnkReportABug.clicked.connect(self.open_bug_report)
