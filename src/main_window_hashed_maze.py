@@ -11,7 +11,7 @@ from doctest import master
 from functools import partial
 
 from PySide6.QtCore import Qt, QTimer, QSettings, QEvent, QUrl
-from PySide6.QtGui import QDesktopServices, QPixmap, QIcon, QWindowStateChangeEvent
+from PySide6.QtGui import QDesktopServices, QPixmap, QIcon, QWindowStateChangeEvent, QColor, QPalette
 from PySide6.QtUiTools import loadUiType
 from PySide6.QtWidgets import (
     QApplication,
@@ -119,6 +119,7 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
         self.cbxDefaultFieldSearch.activated.connect(self.on_change_search_field)
         self.cbxDefaultFieldOrder.activated.connect(self.on_change_search_order)
         self.cbxLogoffTime.activated.connect(self.on_change_search_order)
+        self.cbxColorScheme.activated.connect(self.on_change_color_scheme)
 
         # region ─ button tips
         self._help_search = PopupHelp(
@@ -206,6 +207,9 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
         # components config
         self.btnApply.setEnabled(False)
         self._get_settings()
+
+        # applying color scheme
+        self._apply_color_scheme()        
 
     # region ── Setup ─────────────────────────────────────
     def _setup_initial_screen(self):
@@ -360,7 +364,7 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
 
         self.lblStatusEditionOrError.setText(msg)
         self.lblStatusEditionOrError.setStyleSheet(
-            "color: rgb(127, 255, 0);" if ok else "color:silver;"
+            "color: rgb(130, 130, 130);" if ok else "color:gray;"
         )
     
     def handle_action_msg(self, func, *args):
@@ -369,7 +373,7 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
         self.visual_feedback_on_record_status(ok)
         self.lblStatusEditionOrError.setText(msg)
         self.lblStatusEditionOrError.setStyleSheet(
-            "color: rgb(127, 255, 0);" if ok else "color:silver;"
+            "color: rgb(130, 130, 130);" if ok else "color:gray;"
         )
     
     def open_bug_report(self) -> None:
@@ -383,5 +387,5 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
         )        
 
     def on_close_clicked(self) -> None:
-        self.close()    
+        QApplication.quit()
     # endregion ── Slot button ──────────────────────────────

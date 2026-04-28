@@ -7,25 +7,28 @@ from PySide6.QtCore import QTimer
 
 class SettingsMixin:
     def _get_settings(self: "MainWindow"):
-        sql = "SELECT search_field, sort_by, logoff_time FROM settings WHERE rowid = 1"
+        sql = "SELECT search_field, sort_by, logoff_time, color_scheme FROM settings WHERE rowid = 1"
         result = self.state.db.fetch_one(sql)
         
         if result:
             self.state.ui.search_field = result["search_field"]
             self.state.ui.search_order = result["sort_by"]
             self.state.ui.logoff_time =  result["logoff_time"]
+            self.state.ui.color_scheme =  result["color_scheme"]
             self.set_value_search_variable(result["search_field"])
             self.cbxDefaultFieldSearch.setCurrentText(result["search_field"])
             self.cbxDefaultFieldOrder.setCurrentText(result["sort_by"])
             self.cbxLogoffTime.setCurrentText('-' if result["logoff_time"] == 0 else str(result["logoff_time"]))
+            self.cbxColorScheme.setCurrentText(result["color_scheme"])
             return
         
         self.state.ui.search_field = "all fields"
         self.state.ui.search_order = "url"
+        self.state.ui.color_scheme = "tokio_night"
 
     def _set_settings(self: "MainWindow", settings: dict | None = None) -> bool:
         if settings is None:
-            settings = {"search_field":"user", "sort_by":"url", "logoff_time":"300000"}
+            settings = {"search_field":"user", "sort_by":"url", "logoff_time":"300000", "color_scheme":"tokio_night"}
 
         cols = ", ".join([f"{key} = ?" for key in settings])
         sql = f"UPDATE settings SET {cols}"
@@ -57,11 +60,7 @@ class SettingsMixin:
         self.lblSearchBy.setText(result)
         
         # save settings
-        self._feedback_settings(self._set_settings({
-            "search_field": self.cbxDefaultFieldSearch.currentText(), #.replace(' ', '_'),
-            "sort_by": self.cbxDefaultFieldOrder.currentText(),
-            "logoff_time": int(self.cbxLogoffTime.currentText()) if self.cbxLogoffTime.currentText() != '-' else 0,
-        }))
+        self._feedback_settings(self._set_settings(self._get_current_settings()))
 
     def on_change_search_field(self: "MainWindow"):
         column = self.cbxDefaultFieldSearch.currentText()
@@ -74,8 +73,37 @@ class SettingsMixin:
         self.edtSearch.setPlaceholderText(result)
 
         # save settings
-        self._feedback_settings(self._set_settings({
+        self._feedback_settings(self._set_settings(self._get_current_settings()))
+
+    def on_change_color_scheme(self: "MainWindow"):
+        self.state.ui.color_scheme = self.cbxColorScheme.currentText()
+
+        # save settings
+        self._feedback_settings(self._set_settings(self._get_current_settings()))
+        self._apply_color_scheme()
+    
+    def _get_current_settings(self: "MainWindow") -> dict:
+        return {
             "search_field": self.cbxDefaultFieldSearch.currentText(),
             "sort_by": self.cbxDefaultFieldOrder.currentText(),
             "logoff_time": int(self.cbxLogoffTime.currentText()) if self.cbxLogoffTime.currentText() != '-' else 0,
-        }))
+            "color_scheme": self.cbxColorScheme.currentText(),            
+        }
+
+    def _apply_color_scheme(self: "MainWindow") -> None:
+        schemes = {
+            "tokio_night":"src/styles/tokio_night.qss",
+            "catppuccin_mocha":"src/styles/catppuccin_mocha.qss",
+            "dracula":"src/styles/dracula.qss",
+            "nord":"src/styles/nord.qss",
+            "gruvbox": "src/styles/gruvbox.qss",
+            "one_dark":"src/styles/one_dark.qss",
+        }
+
+        path = schemes.get(self.state.ui.color_scheme)
+
+        if path:
+            with open(path) as f:
+                self.setStyleSheet(f.read())
+        else:
+            self.setStyleSheet("")

@@ -59,6 +59,8 @@ class SQLiteDB:
                     CHECK(sort_by IN('created_at','user','url')),
                 logoff_time INT NOT NULL DEFAULT 300000
                     CHECK (logoff_time = 0 OR logoff_time >= 120000),
+                color_scheme TEXT NOT NULL DEFAULT 'tokio_night'
+                    CHECK (color_scheme IN('tokio_night','catppuccin_mocha','dracula','nord','gruvbox','one_dark','system')),
                 updated_at DATETIME NOT NULL DEFAULT (CURRENT_TIMESTAMP)
             );
         """

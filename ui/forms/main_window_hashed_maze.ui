@@ -40,9 +40,9 @@
            <property name="geometry">
             <rect>
              <x>20</x>
-             <y>25</y>
+             <y>24</y>
              <width>91</width>
-             <height>25</height>
+             <height>26</height>
             </rect>
            </property>
            <property name="statusTip">
@@ -56,9 +56,9 @@
            <property name="geometry">
             <rect>
              <x>210</x>
-             <y>27</y>
+             <y>26</y>
              <width>371</width>
-             <height>21</height>
+             <height>23</height>
             </rect>
            </property>
           </widget>
@@ -105,7 +105,7 @@
           <widget class="QPushButton" name="btnSearch">
            <property name="geometry">
             <rect>
-             <x>120</x>
+             <x>114</x>
              <y>25</y>
              <width>79</width>
              <height>24</height>
@@ -152,7 +152,7 @@
               <x>20</x>
               <y>40</y>
               <width>221</width>
-              <height>21</height>
+              <height>23</height>
              </rect>
             </property>
            </widget>
@@ -162,7 +162,7 @@
               <x>20</x>
               <y>90</y>
               <width>491</width>
-              <height>21</height>
+              <height>23</height>
              </rect>
             </property>
             <property name="placeholderText">
@@ -175,7 +175,7 @@
               <x>20</x>
               <y>140</y>
               <width>221</width>
-              <height>21</height>
+              <height>23</height>
              </rect>
             </property>
             <property name="echoMode">
@@ -195,9 +195,7 @@
              </rect>
             </property>
             <property name="styleSheet">
-             <string notr="true">QPlainTextEdit{
-background-color:rgb(55, 55, 55)
-}</string>
+             <string notr="true"/>
             </property>
            </widget>
            <widget class="QLabel" name="label">
@@ -412,9 +410,7 @@ background-color:rgb(55, 55, 55)
             </rect>
            </property>
            <property name="styleSheet">
-            <string notr="true">QLabel{
-	color:rgb(20, 182, 71)
-}</string>
+            <string notr="true"/>
            </property>
            <property name="text">
             <string>search by...</string>
@@ -436,9 +432,7 @@ background-color:rgb(55, 55, 55)
             <enum>Qt::LayoutDirection::RightToLeft</enum>
            </property>
            <property name="styleSheet">
-            <string notr="true">QLabel{
-	color:rgb(20, 182, 71)
-}</string>
+            <string notr="true"/>
            </property>
            <property name="text">
             <string>...</string>
@@ -676,7 +670,7 @@ background-color:rgb(55, 55, 55)
            <widget class="QLabel" name="label_12">
             <property name="geometry">
              <rect>
-              <x>315</x>
+              <x>312</x>
               <y>30</y>
               <width>91</width>
               <height>16</height>
@@ -686,6 +680,67 @@ background-color:rgb(55, 55, 55)
              <string>Logoff time:</string>
             </property>
            </widget>
+           <widget class="QLabel" name="label_13">
+            <property name="geometry">
+             <rect>
+              <x>314</x>
+              <y>90</y>
+              <width>91</width>
+              <height>16</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Color scheme:</string>
+            </property>
+           </widget>
+           <widget class="QComboBox" name="cbxColorScheme">
+            <property name="geometry">
+             <rect>
+              <x>313</x>
+              <y>110</y>
+              <width>151</width>
+              <height>24</height>
+             </rect>
+            </property>
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>tokio_night</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>catppuccin_mocha</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>dracula</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>nord</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>gruvbox</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>one_dark</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>system</string>
+             </property>
+            </item>
+           </widget>
           </widget>
           <widget class="QLabel" name="lblCFGDatabaseDirectory">
            <property name="geometry">
@@ -693,19 +748,17 @@ background-color:rgb(55, 55, 55)
              <x>20</x>
              <y>500</y>
              <width>801</width>
-             <height>16</height>
+             <height>19</height>
             </rect>
            </property>
            <property name="styleSheet">
-            <string notr="true">QLabel{
-	color:rgb(20, 182, 71)
-}</string>
+            <string notr="true"/>
            </property>
            <property name="text">
-            <string>database directory:</string>
+            <string>path</string>
            </property>
           </widget>
-          <widget class="QLabel" name="lblCFGDatabaseDirectory_2">
+          <widget class="QLabel" name="lblCFGDatabaseDirectory_Title">
            <property name="geometry">
             <rect>
              <x>20</x>
@@ -894,7 +947,7 @@ background-color:rgb(55, 55, 55)
             <string>report a bug</string>
            </property>
           </widget>
-          <widget class="QLabel" name="label_5">
+          <widget class="QLabel" name="lblAboutInfo">
            <property name="geometry">
             <rect>
              <x>60</x>
@@ -920,7 +973,7 @@ Email:
             <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
            </property>
           </widget>
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="lblAbout">
            <property name="geometry">
             <rect>
              <x>60</x>
@@ -955,7 +1008,7 @@ Email:
             <bool>true</bool>
            </property>
           </widget>
-          <widget class="QLabel" name="label_3">
+          <widget class="QLabel" name="lblAboutTitle">
            <property name="geometry">
             <rect>
              <x>330</x>
@@ -976,13 +1029,13 @@ Email:
             <set>Qt::AlignmentFlag::AlignCenter</set>
            </property>
           </widget>
-          <widget class="QLabel" name="label_7">
+          <widget class="QLabel" name="lblAboutSubtitle">
            <property name="geometry">
             <rect>
              <x>60</x>
              <y>150</y>
              <width>101</width>
-             <height>30</height>
+             <height>20</height>
             </rect>
            </property>
            <property name="font">

@@ -20,6 +20,7 @@ class UIState:
         self.editing_id_before_cancel: int | None = None
         self.initial_row_items: dict = {}
         self.logoff_time: int = 0
+        self.color_scheme: str | None = None
 
 class AppState:
     def __init__(self, db_path: str) -> None:
