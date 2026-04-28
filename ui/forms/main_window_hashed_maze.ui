@@ -463,10 +463,10 @@
           <widget class="QFrame" name="frmNavegationResults">
            <property name="geometry">
             <rect>
-             <x>487</x>
-             <y>17</y>
-             <width>300</width>
-             <height>40</height>
+             <x>482</x>
+             <y>25</y>
+             <width>211</width>
+             <height>24</height>
             </rect>
            </property>
            <property name="frameShape">
@@ -476,8 +476,32 @@
             <enum>QFrame::Shadow::Raised</enum>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout">
+            <property name="spacing">
+             <number>1</number>
+            </property>
+            <property name="leftMargin">
+             <number>1</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>1</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
              <widget class="QPushButton" name="btnFirst">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="statusTip">
+               <string>first page</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -485,6 +509,15 @@
             </item>
             <item>
              <widget class="QPushButton" name="btnGoBack">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="statusTip">
+               <string>prvious page</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -492,6 +525,15 @@
             </item>
             <item>
              <widget class="QPushButton" name="btnGoForward">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="statusTip">
+               <string>next page</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -499,6 +541,15 @@
             </item>
             <item>
              <widget class="QPushButton" name="btnLast">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="statusTip">
+               <string>last page</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -520,7 +571,7 @@
             <item>
              <widget class="QLabel" name="lblPagination">
               <property name="text">
-               <string>-- pagination --</string>
+               <string/>
               </property>
              </widget>
             </item>

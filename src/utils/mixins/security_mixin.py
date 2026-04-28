@@ -127,6 +127,10 @@ class SecurityMixin():
 
     def _update_countdown(self: "MainWindow"):
         if hasattr(self, '_logoff_timer'):
+            # controls statusTip overlap
+            if self.statusBar().currentMessage():
+                return
+
             remaining = self._logoff_timer.remainingTime() // 1000
             self.statusBar().showMessage(
                 f"logoff in: {remaining}s" if self.state.ui.logoff_time != 0 else "auto-logoff disabled"
