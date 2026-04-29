@@ -2,12 +2,10 @@
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
-from operator import truediv
 import os
 import re
 import base64
 import logging
-from doctest import master
 from functools import partial
 
 from PySide6.QtCore import Qt, QTimer, QSettings, QEvent, QUrl
@@ -201,13 +199,13 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
         self.tabWidget.setCurrentIndex(2)
         self.tabWidget.currentChanged.connect(self.update_icon)
         self.update_icon(self.tabWidget.currentIndex())
-        self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
-        self.btnApply.setIcon(QIcon("static/icons/apply_20.png"))
+        self.btnShowPWD.setIcon(QIcon(resource_path("static/icons/visibility_20.png")))
+        self.btnApply.setIcon(QIcon(resource_path("static/icons/apply_20.png")))
         self.lblBG.setPixmap(QPixmap("docs/screenshots/bgabout.jpg"))
-        self.btnFirst.setIcon(QIcon("static/icons/first_page_20.png"))
-        self.btnGoBack.setIcon(QIcon("static/icons/back_page_20.png"))
-        self.btnGoForward.setIcon(QIcon("static/icons/forward_page_20.png"))
-        self.btnLast.setIcon(QIcon("static/icons/last_page_20.png"))
+        self.btnFirst.setIcon(QIcon(resource_path("static/icons/first_page_20.png")))
+        self.btnGoBack.setIcon(QIcon(resource_path("static/icons/back_page_20.png")))
+        self.btnGoForward.setIcon(QIcon(resource_path("static/icons/forward_page_20.png")))
+        self.btnLast.setIcon(QIcon(resource_path("static/icons/last_page_20.png")))
         # endregion ── icons/images tasks
 
         self.btnLnkReportABug.clicked.connect(self.open_bug_report)

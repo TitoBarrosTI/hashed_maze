@@ -47,7 +47,7 @@ class MasterPass(QDialog,Ui_MainWindow):
         self.btnShowPWD.clicked.connect(self.show_pwd)
 
         # icons tasks
-        self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
+        self.btnShowPWD.setIcon(QIcon(resource_path("static/icons/visibility_20.png")))
 
 
         self.strength = PasswordStrengthController(
@@ -129,10 +129,10 @@ class MasterPass(QDialog,Ui_MainWindow):
     def show_pwd(self):
         if self.edtMasterPass.echoMode() == QLineEdit.EchoMode.Password:
             self.edtMasterPass.setEchoMode(QLineEdit.EchoMode.Normal)
-            self.btnShowPWD.setIcon(QIcon("static/icons/visibility_off_20.png"))
+            self.btnShowPWD.setIcon(QIcon(resource_path("static/icons/visibility_off_20.png")))
         else:
             self.edtMasterPass.setEchoMode(QLineEdit.EchoMode.Password)
-            self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
+            self.btnShowPWD.setIcon(QIcon(resource_path("static/icons/visibility_20.png")))
 
 class MarqueeController:
     def __init__(self, widget, text, interval=100):

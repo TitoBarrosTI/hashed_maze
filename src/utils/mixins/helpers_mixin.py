@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 )
 
 from src.utils.password_strength import calculate_force
+from src.utils.resource_path import resource_path
 
 class HelpersMixin:
     def update_icon(self: "MainWindow", index) -> None:
@@ -54,11 +55,11 @@ class HelpersMixin:
             self.btnShowPWD.setIcon(QIcon("static/icons/visibility_off_20.png"))
             QTimer.singleShot(10000,lambda: (
                 self.edtPWD.setEchoMode(QLineEdit.EchoMode.Password),
-                self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
+                self.btnShowPWD.setIcon(QIcon(resource_path("static/icons/visibility_20.png")))
             ))
         else:
             self.edtPWD.setEchoMode(QLineEdit.EchoMode.Password)
-            self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
+            self.btnShowPWD.setIcon(QIcon(resource_path("static/icons/visibility_20.png")))
 
     def visual_feedback_on_record_status(self: "MainWindow", status = None):
         # receives integer or None (_editing_id)

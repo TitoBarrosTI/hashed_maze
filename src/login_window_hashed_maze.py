@@ -49,7 +49,7 @@ class LoginWindow(BaseClass,Ui_MainWindow):
         self.btnShowPWD.clicked.connect(self.show_pwd)
 
         # icon/label tasks
-        self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
+        self.btnShowPWD.setIcon(QIcon(resource_path("static/icons/visibility_20.png")))
         self.lblWarning.setVisible(False)
         self.lblMsg.setText('')
 
@@ -143,7 +143,7 @@ class LoginWindow(BaseClass,Ui_MainWindow):
             self.btnShowPWD.setIcon(QIcon("static/icons/visibility_off_20.png"))
         else:
             self.edtPWD.setEchoMode(QLineEdit.EchoMode.Password)
-            self.btnShowPWD.setIcon(QIcon("static/icons/visibility_20.png"))
+            self.btnShowPWD.setIcon(QIcon(resource_path("static/icons/visibility_20.png")))
 
 # --- icon ---
 
