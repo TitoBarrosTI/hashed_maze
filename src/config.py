@@ -3,10 +3,17 @@
 # Licensed under the MIT License
 
 import os
+import sys
 from src.database import SQLiteDB
 
 APP_VERSION = "1.4.0"
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(BASE_DIR, "hashedmazedb.db3")
 
+if getattr(sys, 'frozen', False):
+    # Running as compiled .exe
+    BASE_DIR = os.path.dirname(sys.executable)
+else:
+    # Running in development
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+db_path = os.path.join(BASE_DIR, "hashedmazedb.db3")
 db = SQLiteDB(db_path)

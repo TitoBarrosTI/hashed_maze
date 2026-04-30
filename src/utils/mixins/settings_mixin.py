@@ -5,6 +5,7 @@
 import re
 from PySide6.QtCore import QTimer
 
+from src.utils.resource_path import resource_path
 class SettingsMixin:
     def _get_settings(self: "MainWindow"):
         sql = "SELECT search_field, sort_by, logoff_time, color_scheme FROM settings WHERE rowid = 1"
@@ -103,7 +104,7 @@ class SettingsMixin:
         path = schemes.get(self.state.ui.color_scheme)
 
         if path:
-            with open(path) as f:
+            with open(resource_path(path)) as f:
                 self.setStyleSheet(f.read())
         else:
             self.setStyleSheet("")
