@@ -2,15 +2,11 @@
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
-import os
-import re
-import base64
-import logging
 from functools import partial
 
 from PySide6.QtCore import Qt, QTimer, QSettings, QEvent, QUrl
 from PySide6.QtGui import QDesktopServices, QPixmap, QIcon, QWindowStateChangeEvent, QColor, QPalette
-from PySide6.QtUiTools import loadUiType
+# from PySide6.QtUiTools import loadUiType
 from PySide6.QtWidgets import (
     QApplication,
     QPushButton,
@@ -41,8 +37,12 @@ from src.utils.mixins.crud_mixin import CrudMixin
 from src.utils.mixins.helpers_mixin import HelpersMixin
 from src.utils.mixins.security_mixin import SecurityMixin
 
+from PySide6.QtWidgets import QMainWindow
+from ui.forms.ui_main_window import Ui_MainWindow
+BaseClass = QMainWindow
+
 # Resolve resource path for dev and PyInstaller (_MEIPASS) environments
-Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/main_window_hashed_maze.ui"))  # type: ignore
+# Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/main_window_hashed_maze.ui"))  # type: ignore
 
 class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMixin, HelpersMixin):
     def __init__(self, app_state, parent=None):

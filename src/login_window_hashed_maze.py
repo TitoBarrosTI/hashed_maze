@@ -9,7 +9,7 @@ import threading
 import base64
 from PySide6.QtGui import QWindowStateChangeEvent, QIcon
 from PySide6.QtWidgets import QWidget, QLineEdit
-from PySide6.QtUiTools import loadUiType
+# from PySide6.QtUiTools import loadUiType
 from PySide6.QtCore import Qt, QTimer, QPropertyAnimation, QPoint, QEasingCurve
 from PySide6.QtSvgWidgets import QSvgWidget
 
@@ -20,8 +20,12 @@ from src.password_server import run_server
 from src.core.state import app_state
 from ui.helpers.animations import shake_widget
 
+from PySide6.QtWidgets import QDialog
+from ui.forms.ui_login_window import Ui_Dialog
+BaseClass = QDialog
+
 # Resolve resource path for dev and PyInstaller (_MEIPASS) environments
-Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/login_window_hashed_maze.ui"))  # type: ignore
+# Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/login_window_hashed_maze.ui"))  # type: ignore
 
 _MAX_LOGIN_ATTEMPTS = 3
 
@@ -32,7 +36,8 @@ _LOCK_SVG = b"""
   <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
 </svg>
 """
-class LoginWindow(BaseClass,Ui_MainWindow):
+# class LoginWindow(BaseClass,Ui_MainWindow):
+class LoginWindow(BaseClass,Ui_Dialog):
     def __init__(self, app_state, parent=MainWindow):
         super().__init__()
         self.setupUi(self)

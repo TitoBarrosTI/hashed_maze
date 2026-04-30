@@ -7,7 +7,7 @@ import logging
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QPushButton, QWidget, QDialog, QApplication, QVBoxLayout,
                                QLineEdit, QLabel, QProgressBar)
-from PySide6.QtUiTools import loadUiType
+# from PySide6.QtUiTools import loadUiType
 from zxcvbn import zxcvbn
 from PySide6.QtCore import QTimer, Qt
 
@@ -18,10 +18,15 @@ from src.config import db_path
 from src.database import SQLiteDB
 from src.utils.resource_path import resource_path
 
-# Resolve resource path for dev and PyInstaller (_MEIPASS) environments
-Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/master_pass_hashed_maze.ui"))  # type: ignore
+from PySide6.QtWidgets import QWidget
+from ui.forms.ui_master_pass import Ui_Form
+BaseClass = QWidget
 
-class MasterPass(QDialog,Ui_MainWindow):
+# Resolve resource path for dev and PyInstaller (_MEIPASS) environments
+# Ui_MainWindow, BaseClass = loadUiType(resource_path("ui/forms/master_pass_hashed_maze.ui"))  # type: ignore
+
+# class MasterPass(QDialog,Ui_MainWindow):
+class MasterPass(QDialog,Ui_Form):
     def __init__(self, app_state, parent=MainWindow):
         super().__init__(parent)
         self.setupUi(self)
