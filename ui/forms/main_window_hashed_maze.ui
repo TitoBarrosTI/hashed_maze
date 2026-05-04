@@ -1337,7 +1337,7 @@ background-color: rgba(0, 255, 0, 10); /* Um fundo bem clarinho só pra marcar a
      <x>0</x>
      <y>0</y>
      <width>875</width>
-     <height>33</height>
+     <height>17</height>
     </rect>
    </property>
   </widget>

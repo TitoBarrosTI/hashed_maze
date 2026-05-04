@@ -1,4 +1,4 @@
-# MCacheBox
+# Hashed Maze
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 

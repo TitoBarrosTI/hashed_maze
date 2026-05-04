@@ -1,4 +1,4 @@
-# MCacheBox
+# Hashed Maze
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
@@ -92,19 +92,21 @@ class SettingsMixin:
         }
 
     def _apply_color_scheme(self: "MainWindow") -> None:
+        self.setStyleSheet(self._get_color_scheme_qss())
+    
+    def _get_color_scheme_qss(self: "MainWindow") -> str:
         schemes = {
-            "tokio_night":"src/styles/tokio_night.qss",
-            "catppuccin_mocha":"src/styles/catppuccin_mocha.qss",
-            "dracula":"src/styles/dracula.qss",
-            "nord":"src/styles/nord.qss",
+            "tokio_night": "src/styles/tokio_night.qss",
+            "catppuccin_mocha": "src/styles/catppuccin_mocha.qss",
+            "dracula": "src/styles/dracula.qss",
+            "nord": "src/styles/nord.qss",
             "gruvbox": "src/styles/gruvbox.qss",
-            "one_dark":"src/styles/one_dark.qss",
+            "one_dark": "src/styles/one_dark.qss",
         }
 
         path = schemes.get(self.state.ui.color_scheme)
 
         if path:
             with open(resource_path(path)) as f:
-                self.setStyleSheet(f.read())
-        else:
-            self.setStyleSheet("")
+                return f.read()
+        return ""

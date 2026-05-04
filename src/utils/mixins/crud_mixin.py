@@ -1,4 +1,4 @@
-# MCacheBox
+# Hashed Maze
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
@@ -75,7 +75,7 @@ class CrudMixin:
                     partial(
                         self.on_click_action,
                         int(row["id"]),
-                        f"Really wants delete this access account?",
+                        self.tr(f"Really wants delete this access account?"),
                         f"id reference: {int(row['id'])}",
                     )
                 )                

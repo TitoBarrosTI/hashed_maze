@@ -1,4 +1,4 @@
-# MCacheBox
+# Hashed Maze
 # Copyright (c) 2026 Tito de Barros Junior
 # Licensed under the MIT License
 
@@ -48,6 +48,14 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
     def __init__(self, app_state, parent=None):
         super().__init__()
         self.setupUi(self)
+
+        # self.treeCredentialsResponse.setHeaderLabels([
+        #     self.tr("ACCOUNT"),
+        #     self.tr("URL"),
+        #     self.tr("NOTE"),
+        #     self.tr("ADDED AT"),
+        #     self.tr("ACTION"),
+        # ])
         
         # propagates mouse tracking to all window children (logoff timer helper)
         for widget in self.findChildren(QWidget):
@@ -121,35 +129,35 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
 
         # region ─ button tips
         self._help_search = PopupHelp(
-            title="SEARCH",
-            body="Use 'search by' to filter by a specific field\n"
+            title=self.tr("SEARCH"),
+            body=self.tr("Use 'search by' to filter by a specific field\n"
                 "(account, url, notes) or search across all fields.\n"
-                "Type and press 'search' to find your credentials.",
+                "Type and press 'search' to find your credentials."),
             dark_mode=True,
         )
 
         self._help_credentials = PopupHelp(
-            title="CREDENTIALS",
-            body="Click any result above to load its data here.\n"
+            title=self.tr("CREDENTIALS"),
+            body=self.tr("Click any result above to load its data here.\n"
                 "Edit the fields and press 'apply' to save changes.\n"
-                "Use 'new' to create a fresh credential entry.",
+                "Use 'new' to create a fresh credential entry."),
             dark_mode=True,
         )
 
         self._help_general_config = PopupHelp(
-            title="GENERAL CONFIGURATION",
-            body="Define the default field for searches and how\n"
+            title=self.tr("GENERAL CONFIGURATION"),
+            body=self.tr("Define the default field for searches and how\n"
                 "results are filtered. Changes apply immediately\n"
-                "on the next search.",
+                "on the next search."),
             dark_mode=True,
         )
 
         self._help_manage_password = PopupHelp(
-            title="MANAGE MASTER PASSWORD",
-            body="To change your master password, enter your\n"
+            title=self.tr("MANAGE MASTER PASSWORD"),
+            body=self.tr("To change your master password, enter your\n"
                 "current password, then type and confirm\n"
                 "the new one. All credentials will be\n"
-                "re-encrypted automatically.",
+                "re-encrypted automatically."),
             dark_mode=True,
         )
 
@@ -227,6 +235,7 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
         if CryptoVault.has_master_hash():
             from src.login_window_hashed_maze import LoginWindow
             self.login_or_hash = LoginWindow(self.state, parent=self)
+            self.login_or_hash.setStyleSheet(self._get_color_scheme_qss())
         else:
             from src.master_pass_hashed_maze import MasterPass
             self.login_or_hash = MasterPass(app_state, parent=self)
@@ -309,7 +318,7 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
     def on_edit_fields(self):
         self.btnApply.setEnabled(True)
         self.btnCancel.setEnabled(True)
-        self.handle_action_msg(lambda msg_input: (True, msg_input), "edit mode")
+        self.handle_action_msg(lambda msg_input: (True, msg_input), self.tr("edit mode"))
     # endregion ── Form state ────────────────────────────────
 
     # region ── Slot button ──────────────────────────────
@@ -330,7 +339,7 @@ class MainWindow(BaseClass, Ui_MainWindow, SettingsMixin, CrudMixin, SecurityMix
         self.state.ui.editing_id = self.state.ui.editing_id_before_cancel
 
         # self.visual_feedback_on_record_status(None)
-        self.handle_action_msg(lambda msg_input: (False, msg_input), "view mode")
+        self.handle_action_msg(lambda msg_input: (False, msg_input), self.tr("view mode"))
         self.btnApply.setEnabled(False)
         self.btnCancel.setEnabled(False)
 
